@@ -1,18 +1,23 @@
-// Program.cs
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration; 
+using online_courses.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// === ÑÅĞÂÈÑÛ (èç Startup.ConfigureServices) ===
+// === ÑÅĞÂÈÑÛ ===
 builder.Services.AddControllersWithViews();
+
+// Ïîäêëş÷åíèå ê PostgreSQL
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// === ÏÀÉÏËÀÉÍ (èç Startup.Configure) ===
+// === ÏÀÉÏËÀÉÍ ===
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -22,8 +27,6 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
-// ÓÄÀËÅÍÎ: app.UseHttpsRedirection(); — HTTPS ÍÅ ÍÓÆÅÍ!
 
 app.UseStaticFiles();
 app.UseRouting();
