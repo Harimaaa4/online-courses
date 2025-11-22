@@ -1,0 +1,88 @@
+﻿/* =========================================
+   АДАПТИВНЫЕ СТИЛИ (ГЛАВА 9)
+   (Стили для маленьких экранов)
+   ========================================= */
+
+/* Для планшетов и телефонов (<= 992px) 
+   (Рис. 95, 97)
+*/
+@media (max-width: 992px) {
+
+    /* 1. Скрываем обычное меню и кнопки */
+    .main-nav,
+    .auth-buttons {
+        display: none;
+    }
+
+    /* 2. Показываем "гамбургер" */
+    .hamburger-menu {
+        display: flex; /* Показываем иконку */
+    }
+
+    /* 3. Правило для показа бокового меню (Рис. 100) */
+    .side-menu.active {
+        right: 0; /* Меню выезжает */
+    }
+}
+
+
+/* Для секции "Наши Услуги" (Рис. 103)
+   (<= 768px)
+*/
+@media (max-width: 768px) {
+
+    /* Убираем стрелки */
+    .arrow {
+        display: none;
+    }
+
+    /* Заставляем карточки не скроллиться, а вставать друг под друга */
+    .services-wrapper {
+        flex-direction: column;
+        overflow-x: hidden; /* Отключаем прокрутку */
+        align-items: center; /* Центрируем карточки */
+    }
+
+    .card {
+        min-width: 90%; /* Карточка занимает почти всю ширину */
+        width: 90%;
+        flex: 1 1 auto;
+    }
+
+        .card:hover {
+            transform: translateY(-5px); /* Уменьшаем эффект */
+        }
+}
+
+
+/* Для страницы контактов 
+   (<= 992px, как в твоем старом коде)
+*/
+@media (max-width: 992px) {
+    .contact-container {
+        grid-template-columns: 1fr;
+    }
+
+    .contact-map {
+        height: 400px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+/* =========================================
+   АДАПТАЦИЯ ДЛЯ НОВЫХ БЛОКОВ (ШАГ 4)
+   ========================================= */
+
+@media (max-width: 992px) {
+    .features-grid {
+        grid-template-columns: 1fr; /* 1 колонка на планшетах */
+        gap: 40px;
+    }
+
+    .testimonials-grid {
+        grid-template-columns: 1fr; /* 1 колонка на планшетах */
+        gap: 24px;
+    }
+}

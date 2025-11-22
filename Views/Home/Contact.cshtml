@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Контакты";
+    ViewData["ActivePage"] = "Contact";
+    ViewData["ShowHeaderImage"] = "false";
+}
+
+<div class="contact-page">
+    <!-- Заголовок -->
+    <div class="section-header">
+        <h1>Свяжитесь с нами</h1>
+        <p>Мы всегда рады ответить на ваши вопросы</p>
+    </div>
+
+    <!-- Карта + Контакты -->
+    <div class="contact-container">
+        <!-- КАРТА -->
+        <div class="contact-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d682.3611805716262!2d29.672005282585765!3d46.834934637271616!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40c8fd001120bf1b%3A0x430fe54033f2d67b!2z0J3QsNGF0YPQuQ!5e0!3m2!1sru!2s!4v1762949079932!5m2!1sru!2s"
+                    width="100%"
+                    height="100%"
+                    style="border:0;"
+                    allowfullscreen=""
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+
+        <!-- КОНТАКТЫ -->
+        <div class="contact-info">
+            <div class="info-item">
+                <div class="info-icon">Location</div>
+                <div>
+                    <h3>Адрес</h3>
+                    <p>г. Тирасполь, ул. 25 Октября, 96</p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon">Phone</div>
+                <div>
+                    <h3>Телефон</h3>
+                    <p><a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon">Email</div>
+                <div>
+                    <h3>Email</h3>
+                    <p><a href="mailto:info@onlinecourses.ru">info@onlinecourses.ru</a></p>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-icon">Clock</div>
+                <div>
+                    <h3>Часы работы</h3>
+                    <p>Пн–Пт: 09:00–18:00<br>Сб–Вс: выходной</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ФОРМА ОБРАТНОЙ СВЯЗИ -->
+    <div class="contact-form-section">
+        <h2>Напишите нам</h2>
+        <form class="contact-form" asp-action="Contact" asp-controller="Home" method="post">
+            <div class="form-row">
+                <input type="text" name="Name" placeholder="Ваше имя" required />
+                <input type="email" name="Email" placeholder="Email" required />
+            </div>
+            <input type="text" name="Subject" placeholder="Тема сообщения" required />
+            <textarea name="Message" rows="5" placeholder="Ваше сообщение" required></textarea>
+            <button type="submit" class="button">Отправить</button>
+        </form>
+
+        @if (ViewData["Success"] != null)
+        {
+            // Теперь сообщение будет браться прямо из контроллера
+            // (и для успеха, и для ошибки, т.к. мы используем один и тот же ключ)
+            <div class="success-message">
+                @ViewData["Success"]
+            </div>
+        }
+    </div>
+</div>

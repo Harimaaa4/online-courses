@@ -1,0 +1,91 @@
+﻿@{
+    ViewData["Title"] = "Главная";
+    ViewData["ActivePage"] = "Index";
+}
+
+<div class="services-section">
+    <h2 class="info-section">Наши курсы</h2>
+    <div class="services-container">
+        <div class="services-wrapper" id="servicesWrapper">
+            <div class="card">
+                <img src="~/images/Праим.jpg" alt="Programming Icon">
+                <div class="card-content">
+                    <h3>Программирование</h3>
+                    <p>Глубокое погружение в C#, Python и JavaScript.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="~/images/Котик.jpg" alt="Design Icon">
+                <div class="card-content">
+                    <h3>Дизайн</h3>
+                    <p>Освойте Figma и Photoshop для создания UI/UX.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="~/images/окак.jpg" alt="Marketing Icon">
+                <div class="card-content">
+                    <h3>Маркетинг</h3>
+                    <p>Стратегии SMM и SEO для продвижения бизнеса.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="~/images/Праим.jpg" alt="Programming Icon">
+                <div class="card-content">
+                    <h3>Программирование 2</h3>
+                    <p>Глубокое погружение в C#, Python и JavaScript.</p>
+                </div>
+            </div>
+        </div>
+        <div class="arrow left" onclick="scrollServices(-1)">&lt;</div>
+        <div class="arrow right" onclick="scrollServices(1)">&gt;</div>
+    </div>
+</div>
+
+<div class="features-section">
+    <h2 class="info-section">Почему выбирают нас?</h2>
+    <div class="features-grid">
+        <div class="feature-item">
+            <div class="feature-icon">🎓</div>
+            <h3>Опытные преподаватели</h3>
+            <p>Наши курсы ведут эксперты-практики с многолетним опытом в индустрии.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">🚀</div>
+            <h3>Практика в основе</h3>
+            <p>Фокус на реальных проектах, которые можно добавить в свое портфолио.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon">💻</div>
+            <h3>Гибкий график</h3>
+            <p>Учитесь в любое время и в любом месте с доступом к материалам 24/7.</p>
+        </div>
+    </div>
+</div>
+
+
+<div class="testimonials-section">
+    <h2 class="info-section">Что говорят наши студенты</h2>
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <p class="testimonial-text">"Это лучший курс по C#, который я проходил! Материал объясняется доступно, а проекты помогли мне найти первую работу в IT."</p>
+            <div class="testimonial-author">
+                <span class="testimonial-name">Алексей И.</span>
+                <span class="testimonial-role">Junior .NET Developer</span>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <p class="testimonial-text">"Курс по дизайну превзошел все ожидания. Я не только освоила Figma, но и научилась мыслить как UI/UX специалист. Спасибо!"</p>
+            <div class="testimonial-author">
+                <span class="testimonial-name">Мария В.</span>
+                <span class="testimonial-role">UI/UX Designer</span>
+            </div>
+        </div>
+        <div class="testimonial-card">
+            <p class="testimonial-text">"Благодаря курсу по маркетингу я смог удвоить трафик на свой сайт. Вся информация актуальная и применимая на практике."</p>
+            <div class="testimonial-author">
+                <span class="testimonial-name">Виктор П.</span>
+                <span class="testimonial-role">Маркетолог</span>
+            </div>
+        </div>
+    </div>
+</div>

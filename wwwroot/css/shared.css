@@ -1,0 +1,1118 @@
+﻿/* =========================================
+   ГЛАВНЫЕ СТИЛИ С ПОДДЕРЖКОЙ ТЕМНОЙ ТЕМЫ
+   ========================================= */
+
+/* --- 1. ОПРЕДЕЛЕНИЕ ПЕРЕМЕННЫХ --- */
+:root {
+    /* Светлая тема (По умолчанию) */
+    --bg-body: #f5f5f7;
+    --bg-surface: #ffffff;
+    --bg-surface-header: rgba(255, 255, 255, 0.75); /* Из нашего прошлого шага (75%) */
+    --bg-surface-header-scrolled: #ffffff;
+    --bg-footer: #1c1c1e;
+    --bg-footer-bottom: #111;
+    --bg-input: #fafafa;
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-on-dark-bg: #d1d1d6;
+    --text-on-dark-secondary: #a1a1a6;
+    --accent-primary: #0071e3;
+    --accent-primary-hover: #0061c7;
+    --accent-primary-hover-light: rgba(0, 113, 227, 0.1);
+    --border-color-light: #d2d2d7;
+    --border-color-input: #e5e5ea;
+    --border-header: rgba(0, 0, 0, 0.08);
+    --shadow-card: 0 8px 25px rgba(0, 0, 0, 0.1);
+    --shadow-card-hover: 0 20px 40px rgba(0, 113, 227, 0.2);
+    --shadow-header: 0 1px 10px rgba(0, 0, 0, 0.1);
+    --shadow-button: 0 6px 12px rgba(0, 113, 227, 0.3);
+    --shadow-button-secondary: 0 4px 8px rgba(0, 0, 0, 0.08);
+    --modal-bg: rgba(0, 0, 0, 0.4);
+    --modal-blur: saturate(180%) blur(10px);
+    --success-bg: #d4edda;
+    --success-text: #155724;
+    --error-bg: #FFD2D2;
+    --error-text: #D8000C;
+    --error-border: #D8000C;
+}
+
+body.dark-mode {
+    /* Темная тема (Переопределение) */
+    --bg-body: #0a0a0a;
+    --bg-surface: #1d1d1f;
+    --bg-surface-header: rgba(29, 29, 31, 0.75); /* Темный с 75% прозрачностью */
+    --bg-surface-header-scrolled: #1d1d1f;
+    --bg-footer: #1c1c1e; /* Оставляем тот же */
+    --bg-footer-bottom: #111; /* Оставляем тот же */
+    --bg-input: #2c2c2e;
+    --text-primary: #f5f5f7;
+    --text-secondary: #86868b;
+    --text-on-dark-bg: #d1d1d6;
+    --text-on-dark-secondary: #a1a1a6;
+    --accent-primary: #007aff; /* Чуть ярче синий для темного фона */
+    --accent-primary-hover: #0a84ff;
+    --accent-primary-hover-light: rgba(0, 122, 255, 0.15);
+    --border-color-light: #3a3a3c;
+    --border-color-input: #3a3a3c;
+    --border-header: rgba(255, 255, 255, 0.15);
+    --shadow-card: 0 8px 25px rgba(0, 0, 0, 0.3);
+    --shadow-card-hover: 0 20px 40px rgba(0, 122, 255, 0.3);
+    --shadow-header: 0 1px 10px rgba(0, 0, 0, 0.3);
+    --shadow-button: 0 6px 12px rgba(0, 122, 255, 0.35);
+    --shadow-button-secondary: 0 4px 8px rgba(0, 0, 0, 0.2);
+    --modal-bg: rgba(0, 0, 0, 0.6);
+    --modal-blur: saturate(180%) blur(10px);
+    --success-bg: #0a2d12;
+    --success-text: #5cb85c;
+    --error-bg: #2b0006;
+    --error-text: #ff8a9a;
+    --error-border: #80202d;
+}
+
+
+/* --- 2. СТИЛИ, ИСПОЛЬЗУЮЩИЕ ПЕРЕМЕННЫЕ --- */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 80px;
+    line-height: 1.5;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Плавная смена темы */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+#header-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--bg-surface-header);
+    backdrop-filter: var(--modal-blur);
+    -webkit-backdrop-filter: var(--modal-blur);
+    border-bottom: 1px solid var(--border-header);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    height: 80px;
+    display: flex;
+    align-items: center;
+}
+
+    #header-top.scrolled {
+        background: var(--bg-surface-header-scrolled);
+        box-shadow: var(--shadow-header);
+        height: 70px;
+    }
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo,
+.main-nav a {
+    color: var(--accent-primary) !important;
+    font-weight: 600;
+}
+/* Отделяем .button, т.к. у него своя логика цвета */
+.button {
+    font-weight: 600;
+}
+
+.logo {
+    font-size: 24px;
+    text-decoration: none;
+}
+
+.main-nav ul {
+    display: flex;
+    list-style: none;
+    gap: 32px;
+}
+
+.main-nav a {
+    text-decoration: none;
+    font-size: 17px;
+    transition: opacity 0.3s;
+    position: relative;
+}
+
+    .main-nav a:hover {
+        opacity: 0.7;
+    }
+
+    .main-nav a.active::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--accent-primary);
+        border-radius: 2px;
+    }
+
+.auth-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Переключатель темы */
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--text-primary);
+    transition: transform 0.3s ease, color 0.3s ease;
+    padding: 5px;
+    margin-right: 8px; /* Отступ от кнопок */
+}
+
+    .theme-toggle:hover {
+        transform: scale(1.1) rotate(15deg);
+    }
+
+.button {
+    padding: 8px 16px;
+    background: var(--accent-primary);
+    color: white !important;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 90px;
+}
+
+    .button:hover {
+        background: var(--accent-primary-hover);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-button);
+    }
+
+    .button.secondary {
+        background: transparent;
+        color: var(--accent-primary) !important;
+        border: 1px solid var(--accent-primary);
+    }
+
+        .button.secondary:hover {
+            background: var(--accent-primary-hover-light);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-button-secondary);
+        }
+
+/* =========================================
+   СТИЛИ ДЛЯ АДАПТИВНОГО МЕНЮ (ГЛАВА 9)
+   ========================================= */
+
+.hamburger-menu {
+    display: none; /* ИСПРАВЛЕНО: на ПК скрыт по умолчанию */
+    width: 30px;
+    height: 22px;
+    position: relative;
+    cursor: pointer;
+    /* display: flex; <-- УДАЛЕНО ОТСЮДА */
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+    .hamburger-menu span {
+        display: block;
+        height: 3px;
+        width: 100%;
+        background: var(--accent-primary); /* Цвет иконок */
+        border-radius: 3px;
+        transition: all 0.3s ease;
+    }
+
+    .hamburger-menu.active span:nth-child(1) {
+        transform: rotate(45deg) translate(7px, 7px);
+    }
+
+    .hamburger-menu.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger-menu.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+.side-menu {
+    position: fixed;
+    top: 70px;
+    right: -100%;
+    width: 100%;
+    max-width: 320px;
+    height: calc(100vh - 70px);
+    background: var(--bg-surface);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 1500;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.4s ease, background-color 0.3s ease;
+}
+
+.side-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.side-nav a {
+    display: block;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 600;
+    padding: 10px 0;
+    transition: color 0.3s;
+}
+
+    .side-nav a:hover {
+        color: var(--accent-primary);
+    }
+
+.side-auth-buttons {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+    .side-auth-buttons .button {
+        width: 100%;
+        text-align: center;
+    }
+
+/* ====================== КАРТИНКА ПОД ШАПКОЙ ====================== */
+.img-header {
+    width: 100%;
+    max-width: 1400px;
+    height: auto;
+    max-height: 500px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border-color-light);
+}
+
+/* ====================== КОНТЕНТ ====================== */
+.main-content {
+    flex: 1;
+    padding: 60px 0;
+}
+
+/* ====================== СЕКЦИЯ «О НАС» ====================== */
+.container-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 80px auto;
+    padding: 0 20px;
+    max-width: 1200px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.info-section {
+    margin-bottom: 28px;
+    font-size: 40px;
+    color: var(--accent-primary);
+    font-weight: 700;
+    text-align: center;
+}
+
+.text {
+    text-indent: 40px;
+    margin: 5px 0;
+    text-align: justify;
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    max-width: 900px;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ====================== СЕКЦИЯ «НАШИ УСЛУГИ» ====================== */
+.services-section {
+    margin: 80px 0;
+    padding: 0 20px;
+}
+
+.services-container {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.services-wrapper {
+    display: flex;
+    overflow-x: auto;
+    gap: 24px;
+    padding: 20px 0;
+    scrollbar-width: none;
+}
+
+    .services-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+.card {
+    min-width: 320px;
+    background: var(--bg-surface);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: all 0.4s ease;
+    flex: 0 0 auto;
+}
+
+    .card:hover {
+        transform: translateY(-12px);
+        box-shadow: var(--shadow-card-hover);
+    }
+
+    .card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+.card-content {
+    padding: 20px;
+}
+
+    .card-content h3 {
+        margin: 0 0 12px 0;
+        color: var(--accent-primary);
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    .card-content p {
+        margin: 0;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-size: 16px;
+    }
+
+/* Стрелки прокрутки */
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 113, 227, 0.8); /* Используем цвет accent, но с альфой */
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    user-select: none;
+    z-index: 10;
+    transition: 0.3s;
+}
+
+    .arrow:hover {
+        background: var(--accent-primary);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .arrow.left {
+        left: -25px;
+    }
+
+    .arrow.right {
+        right: -25px;
+    }
+
+/* ====================== ФУТЕР — СОВРЕМЕННЫЙ СТИЛЬ ====================== */
+footer {
+    margin-top: auto;
+    background: var(--bg-footer);
+    color: var(--text-on-dark-bg);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.footer-inner {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding: 60px 20px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent-primary);
+    margin-bottom: 12px;
+}
+
+.footer-text {
+    color: var(--text-on-dark-secondary);
+    font-size: 14px;
+    max-width: 280px;
+}
+
+.footer-links h4,
+.footer-contact h4,
+.footer-social h4 {
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links a {
+    color: var(--text-on-dark-secondary);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 8px;
+    transition: color 0.3s;
+}
+
+    .footer-links a:hover {
+        color: var(--accent-primary);
+    }
+
+.footer-contact p {
+    margin-bottom: 8px;
+    color: var(--text-on-dark-secondary);
+}
+
+.footer-contact a {
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+    .footer-contact a:hover {
+        text-decoration: underline;
+    }
+
+.social-icons {
+    display: flex;
+    gap: 16px;
+}
+
+    .social-icons a {
+        width: 40px;
+        height: 40px;
+        background: var(--accent-primary);
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+        .social-icons a:hover {
+            background: var(--accent-primary-hover);
+            transform: translateY(-3px);
+        }
+
+.footer-bottom {
+    background: var(--bg-footer-bottom);
+    padding: 20px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+    .footer-bottom p {
+        margin: 4px 0;
+    }
+
+    .footer-bottom a {
+        color: var(--accent-primary);
+        text-decoration: none;
+    }
+
+        .footer-bottom a:hover {
+            text-decoration: underline;
+        }
+
+/* ====================== СТРАНИЦА КОНТАКТОВ ====================== */
+.contact-page {
+    padding: 40px 0;
+    background: var(--bg-body);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+    .section-header h1 {
+        font-size: 42px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+    }
+
+    .section-header p {
+        font-size: 18px;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+.contact-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.contact-map {
+    height: 500px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+}
+
+    .contact-map iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+/* Фильтр для карты в темной теме */
+body.dark-mode .contact-map iframe {
+    filter: invert(100%) grayscale(80%);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 20px 0;
+}
+
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.info-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.info-item h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+
+.info-item p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+.info-item a {
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+    .info-item a:hover {
+        text-decoration: underline;
+    }
+
+/* Форма Контактов */
+.contact-form-section {
+    max-width: 800px;
+    margin: 80px auto 0;
+    padding: 0 20px;
+    text-align: center;
+}
+
+    .contact-form-section h2 {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 32px;
+    }
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--bg-surface);
+    padding: 40px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Оставим тень как в светлой */
+}
+
+body.dark-mode .contact-form {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: 14px 16px;
+    border: 2px solid var(--border-color-input);
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s;
+    background: var(--bg-input);
+    color: var(--text-primary);
+}
+
+    .contact-form input:focus,
+    .contact-form textarea:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+        background: var(--bg-surface);
+        box-shadow: 0 0 0 4px var(--accent-primary-hover-light);
+    }
+
+.contact-form button {
+    align-self: flex-start;
+    margin-top: 8px;
+}
+
+/* Успешное сообщение */
+.success-message {
+    background: var(--success-bg);
+    color: var(--success-text);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* =========================================
+   СТИЛИ МОДАЛЬНЫХ ОКОН (ВХОД/РЕГИСТРАЦИЯ)
+   ========================================= */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    background: var(--modal-bg);
+    backdrop-filter: var(--modal-blur);
+    -webkit-backdrop-filter: var(--modal-blur);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+.modal {
+    background: var(--bg-surface);
+    padding: 32px;
+    border-radius: 18px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    margin: 20px;
+    display: none;
+    transform: scale(0.9) translateY(10px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-overlay.active .modal.active {
+    display: block;
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.modal h2 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modal .modal-subtitle {
+    text-align: center;
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+    .modal-form input {
+        padding: 14px 16px;
+        border: 2px solid var(--border-color-input);
+        border-radius: 12px;
+        font-size: 16px;
+        transition: all 0.3s;
+        background: var(--bg-input);
+        color: var(--text-primary);
+    }
+
+        .modal-form input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-surface);
+            box-shadow: 0 0 0 4px var(--accent-primary-hover-light);
+        }
+
+    .modal-form .button {
+        width: 100%;
+        padding: 12px 24px;
+        font-size: 16px;
+        margin-top: 8px;
+    }
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+    .modal-close:hover {
+        color: var(--text-primary);
+    }
+
+.modal-switch {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 15px;
+    color: var(--text-secondary);
+}
+
+    .modal-switch a {
+        color: var(--accent-primary);
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+        .modal-switch a:hover {
+            text-decoration: underline;
+        }
+
+/* Стили для ошибок (Глава 8) */
+.error-container {
+    margin-bottom: 10px; /* Немного меньше места */
+}
+
+.error {
+    background: var(--error-bg);
+    color: var(--error-text);
+    border: 1px solid var(--error-border);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-align: left;
+}
+/*Группа для правых элементов шапки*/
+.header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Расстояние между переключателем темы и кнопками */
+}
+/* =========================================
+   НОВЫЕ СТИЛИ ДЛЯ ГЛАВНОЙ СТРАНИЦЫ (ШАГ 4)
+   ========================================= */
+
+/* --- Секция "Почему мы?" (Features) --- */
+
+.features-section {
+    padding: 60px 0;
+    background-color: #ffffff; /* Белый фон, чтобы выделить секцию */
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 колонки */
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.feature-item {
+    text-align: center;
+    padding: 20px;
+}
+
+.feature-icon {
+    font-size: 44px; /* Размер иконки */
+    margin-bottom: 20px;
+    line-height: 1;
+    color: var(--accent-primary); /* Делаем иконку синей (или яркой в темной теме) */
+}
+
+.feature-item h3 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1d1d1f; /* Стандартный темный текст */
+    margin-bottom: 10px;
+}
+
+.feature-item p {
+    font-size: 16px;
+    color: #6e6e73; /* Стандартный серый текст */
+    line-height: 1.6;
+}
+
+/* --- Секция "Отзывы" (Testimonials) --- */
+
+.testimonials-section {
+    padding: 80px 0;
+    /* Фон остается как у body (#f5f5f7) */
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.testimonial-card {
+    background: #ffffff;
+    border-radius: 16px; /* Как у наших карточек .card */
+    padding: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Как у .card */
+    display: flex;
+    flex-direction: column;
+}
+
+.testimonial-text {
+    font-size: 17px;
+    color: #1d1d1f;
+    line-height: 1.6;
+    font-style: italic;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Чтобы карточки были одной высоты */
+}
+
+.testimonial-author {
+    text-align: right;
+    border-top: 1px solid #e5e5ea; /* Легкий разделитель */
+    padding-top: 20px;
+}
+
+.testimonial-name {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0071e3; /* Синий акцент */
+}
+
+.testimonial-role {
+    display: block;
+    font-size: 14px;
+    color: #6e6e73;
+}
+
+
+/* --- Адаптация для новых блоков --- */
+@media (max-width: 992px) {
+    .features-grid {
+        grid-template-columns: 1fr; /* 1 колонка на планшетах */
+        gap: 40px;
+    }
+
+    .testimonials-grid {
+        grid-template-columns: 1fr; /* 1 колонка на планшетах */
+        gap: 24px;
+    }
+}
+/* =========================================
+   НОВЫЕ СТИЛИ ДЛЯ АНИМАЦИИ МОДАЛОК (ШАГ 5)
+   ========================================= */
+
+/* Контейнер .modal должен скрывать все, что выходит за его пределы */
+.modal {
+    overflow: hidden; /* Важно для анимаций */
+}
+
+/* Формы .modal-form теперь будут анимироваться */
+.modal-form {
+    /* Позиционируем формы друг над другом.
+       position: relative; у .modal уже есть.
+    */
+    position: relative;
+    /* Анимация */
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+    /*
+   Стиль .form-hidden будет применяться к форме, 
+   которую мы ХОТИМ СКРЫТЬ (она будет уезжать вверх)
+*/
+    .modal-form.form-hidden {
+        position: absolute; /* Убираем из потока, чтобы новая форма заняла ее место */
+        top: 32px; /* 32px - это padding у .modal */
+        left: 32px;
+        right: 32px;
+        opacity: 0;
+        transform: translateY(-20px);
+        z-index: 1; /* Старая форма должна быть "под" новой */
+    }
+
+    /*
+   Стиль .form-visible будет применяться к форме,
+   которую мы ХОТИМ ПОКАЗАТЬ (она будет появляться снизу)
+*/
+    .modal-form.form-visible {
+        opacity: 1;
+        transform: translateY(0);
+        z-index: 2;
+    }
+
+    /* Стиль, который мы временно дадим форме перед тем, 
+   как она появится (чтобы она могла "выехать")
+*/
+    .modal-form.form-before-enter {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    /* =========================================
+   СТИЛИ ДЛЯ ОБРАТНОЙ СВЯЗИ ФОРМ (ШАГ 2)
+   ========================================= */
+
+    /* 1. Стили для поля с ошибкой */
+    .modal-form input.input-error {
+        border-color: var(--error-border);
+        background: var(--error-bg);
+    }
+
+        .modal-form input.input-error:focus {
+            border-color: var(--error-border);
+            box-shadow: 0 0 0 4px rgba(216, 0, 12, 0.2);
+        }
+
+/* 2. Стили для кнопки в состоянии загрузки */
+.button.is-loading {
+    position: relative;
+    color: transparent !important; /* Прячем текст кнопки */
+    cursor: wait;
+}
+
+    /* 3. Сам спиннер */
+    .button.is-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-top: -10px;
+        margin-left: -10px;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        border-top-color: #ffffff; /* Белый цвет спиннера */
+        border-radius: 50%;
+        /* Анимация вращения */
+        animation: spinner 0.8s linear infinite;
+    }
+
+/* Для второстепенной кнопки спиннер будет синим */
+.button.secondary.is-loading::after {
+    border: 3px solid var(--accent-primary-hover-light);
+    border-top-color: var(--accent-primary);
+}
+
+/* Анимация */
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}

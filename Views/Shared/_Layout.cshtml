@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Онлайн курсы</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet" href="~/css/shared.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/media_style.css" asp-append-version="true" />
+</head>
+<body>
+
+    <script>
+        (function() {
+            // Проверяем тему в localStorage
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                // Если 'dark', немедленно применяем класс
+                document.body.classList.add('dark-mode');
+            }
+        })();
+    </script>
+    <header id="header-top">
+        <div class="header-inner">
+            <a asp-controller="Home" asp-action="Index" class="logo">Онлайн курсы</a>
+
+            <nav class="main-nav">
+                <ul>
+                    <li>
+                        <a asp-controller="Home" asp-action="Index"
+                           class="@(ViewData["ActivePage"] == "Index" ? "active" : "")">
+                            Главная
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Home" asp-action="Contact"
+                           class="@(ViewData["ActivePage"] == "Contact" ? "active" : "")">
+                            Контакты
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Home" asp-action="Courses"
+                           class="@(ViewData["ActivePage"] == "Courses" ? "active" : "")">
+                            Курсы
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Home" asp-action="SiteInformation"
+                           class="@(ViewData["ActivePage"] == "SiteInformation" ? "active" : "")">
+                            О нас
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+                        
+            <div class="header-right-group">
+
+                <button class="theme-toggle" id="theme-toggle" title="Переключить тему">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+
+                <div class="auth-buttons">
+                    <button class="button secondary" id="open-login-modal">Войти</button>
+                    <button class="button" id="open-register-modal">Зарегистрироваться</button>
+                </div>
+
+                <div class="hamburger-menu" id="hamburger-menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
+        </div>
+    </header>
+
+    <div class="side-menu" id="side-menu">
+        <nav class="side-nav">
+            <ul>
+                <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
+                <li><a asp-controller="Home" asp-action="Contact">Контакты</a></li>
+                <li><a asp-controller="Home" asp-action="Courses">Курсы</a></li>
+                <li><a asp-controller="Home" asp-action="SiteInformation">О нас</a></li>
+            </ul>
+        </nav>
+        <div class="side-auth-buttons">
+            <button class="button secondary" id="side-open-login">Войти</button>
+            <button class="button" id="side-open-register">Зарегистрироваться</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+
+        <div class="modal" id="login-modal">
+            <span class="modal-close" data-close-modal>&times;</span>
+            <h2>Вход</h2>
+            <p class="modal-subtitle">Добро пожаловать обратно!</p>
+
+            <form class="modal-form" onsubmit="return false;">
+                <div id="login-error-container" class="error-container"></div>
+                <input type="email" id="login-email" name="Email" placeholder="Email" required />
+                <input type="password" id="login-password" name="Password" placeholder="Пароль" required />
+                <button type="submit" id="login-submit-btn" class="button">Войти</button>
+            </form>
+
+            <p class="modal-switch">
+                Нет аккаунта?
+                <a href="#" data-switch-modal="register-modal">Зарегистрироваться</a>
+            </p>
+        </div>
+
+        <div class="modal" id="register-modal">
+            <span class="modal-close" data-close-modal>&times;</span>
+            <h2>Регистрация</h2>
+            <p class="modal-subtitle">Создайте аккаунт, это быстро!</p>
+
+            <form class="modal-form" onsubmit="return false;">
+                <div id="register-error-container" class="error-container"></div>
+                <input type="text" id="register-login" name="Login" placeholder="Ваше имя (Логин)" required />
+                <input type="email" id="register-email" name="Email" placeholder="Email" required />
+                <input type="password" id="register-password" name="Password" placeholder="Придумайте пароль" required />
+                <input type="password" id="register-passwordConfirm" name="PasswordConfirm" placeholder="Повторите пароль" required />
+                <button type="submit" id="register-submit-btn" class="button">Создать аккаунт</button>
+            </form>
+
+            <p class="modal-switch">
+                Уже есть аккаунт?
+                <a href="#" data-switch-modal="login-modal">Войти</a>
+            </p>
+        </div>
+    </div>
+
+    @if (ViewData["ShowHeaderImage"]?.ToString() != "false")
+    {
+        <img class="img-header" src="~/images/main-banner.jpg" alt="Обложка курсов" />
+    }
+
+    <main class="main-content">
+        <div class="container">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-inner">
+            <div class="footer-left">
+                <div class="footer-logo">Онлайн курсы</div>
+                <p class="footer-text">Обучайтесь с удовольствием — в любое время, в любом месте.</p>
+            </div>
+
+            <div class="footer-links">
+                <h4>Навигация</h4>
+                <ul>
+                    <li><a asp-controller="Home" asp-action="Index">Главная</a></li>
+                    <li><a asp-controller="Home" asp-action="SiteInformation">О нас</a></li>
+                    <li><a asp-controller="Home" asp-action="Courses">Курсы</a></li>
+                    <li><a asp-controller="Home" asp-action="Contact">Контакты</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-contact">
+                <h4>Связь</h4>
+                <p><strong>Email:</strong> <a href="mailto:info@onlinecourses.ru">info@onlinecourses.ru</a></p>
+                <p><strong>Телефон:</strong> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+            </div>
+
+            <div class="footer-social">
+                <h4>Мы в соцсетях</h4>
+                <div class="social-icons">
+                    <a href="#" aria-label="VK">VK</a>
+                    <a href="#" aria-label="Telegram">TG</a>
+                    <a href="#" aria-label="YouTube">YT</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="container">
+                <p>© 2025 Онлайн курсы. Все права защищены.</p>
+                <p><a asp-controller="Home" asp-action="Privacy">Политика конфиденциальности</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/shared_script.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
