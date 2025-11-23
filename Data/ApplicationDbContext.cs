@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using online_courses.Entities;
-using System.Collections.Generic;
 
 namespace online_courses.Data
 {
@@ -12,7 +11,7 @@ namespace online_courses.Data
         }
 
         public DbSet<UserDb> Users { get; set; }
-        public DbSet<CountryDb> Countries { get; set; }
-        public DbSet<TourDb> Tours { get; set; }
+        public DbSet<CategoryDb> Categories { get; set; } // Бывшие Countries
+        public DbSet<CourseDb> Courses { get; set; }       // Бывшие Tours
     }
 }

@@ -33,31 +33,31 @@
                 <ul>
                     <li>
                         <a asp-controller="Home" asp-action="Index"
-                           class="@(ViewData["ActivePage"] == "Index" ? "active" : "")">
+                           class="@(ViewData["ActivePage"]?.ToString() == "Index" ? "active" : "")">
                             Главная
                         </a>
                     </li>
                     <li>
                         <a asp-controller="Home" asp-action="Contact"
-                           class="@(ViewData["ActivePage"] == "Contact" ? "active" : "")">
+                           class="@(ViewData["ActivePage"]?.ToString() == "Contact" ? "active" : "")">
                             Контакты
                         </a>
                     </li>
                     <li>
                         <a asp-controller="Home" asp-action="Courses"
-                           class="@(ViewData["ActivePage"] == "Courses" ? "active" : "")">
+                           class="@(ViewData["ActivePage"]?.ToString() == "Courses" ? "active" : "")">
                             Курсы
                         </a>
                     </li>
                     <li>
                         <a asp-controller="Home" asp-action="SiteInformation"
-                           class="@(ViewData["ActivePage"] == "SiteInformation" ? "active" : "")">
+                           class="@(ViewData["ActivePage"]?.ToString() == "SiteInformation" ? "active" : "")">
                             О нас
                         </a>
                     </li>
                 </ul>
             </nav>
-                        
+
             <div class="header-right-group">
 
                 <button class="theme-toggle" id="theme-toggle" title="Переключить тему">
@@ -65,10 +65,20 @@
                     <span class="icon-moon">🌙</span>
                 </button>
 
-                <div class="auth-buttons">
-                    <button class="button secondary" id="open-login-modal">Войти</button>
-                    <button class="button" id="open-register-modal">Зарегистрироваться</button>
-                </div>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="user-menu" style="display: flex; align-items: center; gap: 15px;">
+                        <span style="font-weight: 600;">@User.Identity.Name</span>
+                        <a asp-controller="Home" asp-action="Logout" class="button">Выйти</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="auth-buttons">
+                        <button class="button secondary" id="open-login-modal">Войти</button>
+                        <button class="button" id="open-register-modal">Зарегистрироваться</button>
+                    </div>
+                }
 
                 <div class="hamburger-menu" id="hamburger-menu">
                     <span></span>
@@ -90,9 +100,20 @@
                 <li><a asp-controller="Home" asp-action="SiteInformation">О нас</a></li>
             </ul>
         </nav>
+
         <div class="side-auth-buttons">
-            <button class="button secondary" id="side-open-login">Войти</button>
-            <button class="button" id="side-open-register">Зарегистрироваться</button>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div style="text-align: center; margin-bottom: 10px; font-weight: bold;">
+                    @User.Identity.Name
+                </div>
+                <a asp-controller="Home" asp-action="Logout" class="button">Выйти</a>
+            }
+            else
+            {
+                <button class="button secondary" id="side-open-login">Войти</button>
+                <button class="button" id="side-open-register">Зарегистрироваться</button>
+            }
         </div>
     </div>
 
