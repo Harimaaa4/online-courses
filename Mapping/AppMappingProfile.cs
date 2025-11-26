@@ -20,6 +20,9 @@ namespace online_courses
 
             // Превращение: User (Domain) <-> UserDb (База данных)
             CreateMap<User, UserDb>().ReverseMap();
+
+            CreateMap<RegisterViewModel, ConfirmEmailViewModel>().ReverseMap();
+            CreateMap<User, ConfirmEmailViewModel>().ReverseMap();
         }
     }
 }

@@ -1014,57 +1014,32 @@ body.dark-mode .contact-form {
     }
 }
 /* =========================================
-   НОВЫЕ СТИЛИ ДЛЯ АНИМАЦИИ МОДАЛОК (ШАГ 5)
+   ИСПРАВЛЕННЫЕ СТИЛИ ДЛЯ ФОРМ (ШАГ 5)
    ========================================= */
 
-/* Контейнер .modal должен скрывать все, что выходит за его пределы */
 .modal {
-    overflow: hidden; /* Важно для анимаций */
+    overflow: hidden;
 }
 
-/* Формы .modal-form теперь будут анимироваться */
+/* Форма всегда видна и стоит на месте */
 .modal-form {
-    /* Позиционируем формы друг над другом.
-       position: relative; у .modal уже есть.
-    */
     position: relative;
-    /* Анимация */
     opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: none;
+    transition: none;
+    z-index: auto;
 }
 
-    /*
-   Стиль .form-hidden будет применяться к форме, 
-   которую мы ХОТИМ СКРЫТЬ (она будет уезжать вверх)
-*/
-    .modal-form.form-hidden {
-        position: absolute; /* Убираем из потока, чтобы новая форма заняла ее место */
-        top: 32px; /* 32px - это padding у .modal */
-        left: 32px;
-        right: 32px;
-        opacity: 0;
-        transform: translateY(-20px);
-        z-index: 1; /* Старая форма должна быть "под" новой */
-    }
-
-    /*
-   Стиль .form-visible будет применяться к форме,
-   которую мы ХОТИМ ПОКАЗАТЬ (она будет появляться снизу)
-*/
-    .modal-form.form-visible {
-        opacity: 1;
-        transform: translateY(0);
-        z-index: 2;
-    }
-
-    /* Стиль, который мы временно дадим форме перед тем, 
-   как она появится (чтобы она могла "выехать")
-*/
+    /* Если вдруг скрипт добавит эти классы - игнорируем их, 
+   чтобы форма не исчезала */
+    .modal-form.form-hidden,
+    .modal-form.form-visible,
     .modal-form.form-before-enter {
-        opacity: 0;
-        transform: translateY(20px);
+        position: relative;
+        opacity: 1;
+        transform: none;
     }
+
     /* =========================================
    СТИЛИ ДЛЯ ОБРАТНОЙ СВЯЗИ ФОРМ (ШАГ 2)
    ========================================= */
@@ -1083,11 +1058,10 @@ body.dark-mode .contact-form {
 /* 2. Стили для кнопки в состоянии загрузки */
 .button.is-loading {
     position: relative;
-    color: transparent !important; /* Прячем текст кнопки */
+    color: transparent !important;
     cursor: wait;
 }
 
-    /* 3. Сам спиннер */
     .button.is-loading::after {
         content: '';
         position: absolute;
@@ -1098,21 +1072,45 @@ body.dark-mode .contact-form {
         margin-top: -10px;
         margin-left: -10px;
         border: 3px solid rgba(255, 255, 255, 0.5);
-        border-top-color: #ffffff; /* Белый цвет спиннера */
+        border-top-color: #ffffff;
         border-radius: 50%;
-        /* Анимация вращения */
         animation: spinner 0.8s linear infinite;
     }
 
-/* Для второстепенной кнопки спиннер будет синим */
 .button.secondary.is-loading::after {
     border: 3px solid var(--accent-primary-hover-light);
     border-top-color: var(--accent-primary);
 }
 
-/* Анимация */
 @keyframes spinner {
     to {
         transform: rotate(360deg);
     }
+}
+/* === ИСПРАВЛЕНИЕ ВИДИМОСТИ ПОЛЕЙ (ФИНАЛЬНОЕ) === */
+
+/* 1. Делаем форму видимой всегда, когда окно открыто */
+.modal.active .modal-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    position: relative !important;
+    z-index: 100 !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* 2. Убеждаемся, что поля ввода (input) тоже видны */
+.modal-form input {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 3. Если скрипт добавляет класс .form-hidden, только тогда скрываем */
+.modal-form.form-hidden {
+    display: none !important;
 }
