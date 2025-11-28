@@ -17,10 +17,8 @@
 
     <script>
         (function() {
-            // Проверяем тему в localStorage
             const theme = localStorage.getItem('theme');
             if (theme === 'dark') {
-                // Если 'dark', немедленно применяем класс
                 document.body.classList.add('dark-mode');
             }
         })();
@@ -59,7 +57,6 @@
             </nav>
 
             <div class="header-right-group">
-
                 <button class="theme-toggle" id="theme-toggle" title="Переключить тему">
                     <span class="icon-sun">☀️</span>
                     <span class="icon-moon">🌙</span>
@@ -85,9 +82,7 @@
                     <span></span>
                     <span></span>
                 </div>
-
             </div>
-
         </div>
     </header>
 
@@ -100,7 +95,6 @@
                 <li><a asp-controller="Home" asp-action="SiteInformation">О нас</a></li>
             </ul>
         </nav>
-
         <div class="side-auth-buttons">
             @if (User.Identity.IsAuthenticated)
             {
@@ -117,32 +111,52 @@
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-overlay">
+    <div class="auth-overlay" id="modal-overlay">
 
-        <div class="modal" id="login-modal">
-            <span class="modal-close" data-close-modal>&times;</span>
+        <div class="auth-modal" id="login-modal">
+            <span class="auth-modal-close" data-close-modal>&times;</span>
             <h2>Вход</h2>
+            <p class="modal-subtitle">Добро пожаловать обратно!</p>
+
+            <form class="auth-form" onsubmit="return false;">
+                <div id="login-error-container" class="error-container"></div>
+                <input type="email" id="login-email" name="Email" placeholder="Email" required />
+                <input type="password" id="login-password" name="Password" placeholder="Пароль" required />
+                <button type="submit" id="login-submit-btn" class="button">Войти</button>
+            </form>
+
             <p class="modal-switch">
                 Нет аккаунта?
                 <a href="#" data-switch-modal="register-modal">Зарегистрироваться</a>
             </p>
         </div>
 
-        <div class="modal" id="register-modal">
-            <span class="modal-close" data-close-modal>&times;</span>
+        <div class="auth-modal" id="register-modal">
+            <span class="auth-modal-close" data-close-modal>&times;</span>
             <h2>Регистрация</h2>
+            <p class="modal-subtitle">Создайте аккаунт, это быстро!</p>
+
+            <form class="auth-form" onsubmit="return false;">
+                <div id="register-error-container" class="error-container"></div>
+                <input type="text" id="register-login" name="Login" placeholder="Ваше имя (Логин)" required />
+                <input type="email" id="register-email" name="Email" placeholder="Email" required />
+                <input type="password" id="register-password" name="Password" placeholder="Придумайте пароль" required />
+                <input type="password" id="register-passwordConfirm" name="PasswordConfirm" placeholder="Повторите пароль" required />
+                <button type="submit" id="register-submit-btn" class="button">Создать аккаунт</button>
+            </form>
+
             <p class="modal-switch">
                 Уже есть аккаунт?
                 <a href="#" data-switch-modal="login-modal">Войти</a>
             </p>
         </div>
 
-        <div class="modal" id="confirm-email-modal">
-            <span class="modal-close" data-close-modal>&times;</span>
+        <div class="auth-modal" id="confirm-email-modal">
+            <span class="auth-modal-close" data-close-modal>&times;</span>
             <h2>Подтверждение</h2>
-            <p class="modal-subtitle">Введите код, отправленный на вашу почту</p>
+            <p class="modal-subtitle">Введите код из письма</p>
 
-            <form class="modal-form" onsubmit="return false;">
+            <form class="auth-form" onsubmit="return false;">
                 <div id="confirm-error-container" class="error-container"></div>
 
                 <input type="hidden" id="confirm-login" />
@@ -150,13 +164,13 @@
                 <input type="hidden" id="confirm-password" />
                 <input type="hidden" id="confirm-generated-code" />
 
-                <input type="text" id="confirm-code" placeholder="Код из письма" required style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;" />
-
+                <input type="text" id="confirm-code" placeholder="Код" required style="text-align: center; font-size: 1.2rem; letter-spacing: 2px;" />
                 <button type="submit" id="confirm-submit-btn" class="button">Подтвердить</button>
             </form>
         </div>
 
     </div>
+
     @if (ViewData["ShowHeaderImage"]?.ToString() != "false")
     {
         <img class="img-header" src="~/images/main-banner.jpg" alt="Обложка курсов" />
@@ -174,7 +188,6 @@
                 <div class="footer-logo">Онлайн курсы</div>
                 <p class="footer-text">Обучайтесь с удовольствием — в любое время, в любом месте.</p>
             </div>
-
             <div class="footer-links">
                 <h4>Навигация</h4>
                 <ul>
@@ -184,13 +197,11 @@
                     <li><a asp-controller="Home" asp-action="Contact">Контакты</a></li>
                 </ul>
             </div>
-
             <div class="footer-contact">
                 <h4>Связь</h4>
                 <p><strong>Email:</strong> <a href="mailto:info@onlinecourses.ru">info@onlinecourses.ru</a></p>
                 <p><strong>Телефон:</strong> <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
             </div>
-
             <div class="footer-social">
                 <h4>Мы в соцсетях</h4>
                 <div class="social-icons">
@@ -200,7 +211,6 @@
                 </div>
             </div>
         </div>
-
         <div class="footer-bottom">
             <div class="container">
                 <p>© 2025 Онлайн курсы. Все права защищены.</p>

@@ -155,5 +155,12 @@ namespace online_courses.Controllers
 
             return BadRequest(new { description = errors });
         }
+        // Метод выхода из системы
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
     }
+
 }

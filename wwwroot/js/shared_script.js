@@ -11,7 +11,7 @@
         }
     });
 
-    // 2. МОДАЛЬНЫЕ ОКНА (ИСПРАВЛЕНО ОТОБРАЖЕНИЕ)
+    // 2. МОДАЛЬНЫЕ ОКНА (НОВЫЕ КЛАССЫ: AUTH-MODAL)
     const modalOverlay = document.getElementById('modal-overlay');
     const loginModal = document.getElementById('login-modal');
     const registerModal = document.getElementById('register-modal');
@@ -19,6 +19,7 @@
 
     const openLoginBtn = document.getElementById('open-login-modal');
     const openRegisterBtn = document.getElementById('open-register-modal');
+
     const closeBtns = document.querySelectorAll('[data-close-modal]');
     const switchBtns = document.querySelectorAll('[data-switch-modal]');
 
@@ -28,50 +29,24 @@
             if (!modal) return;
             modalOverlay.classList.add('active');
             modal.classList.add('active');
-
-            // !!! ВАЖНО: Делаем форму видимой !!!
-            const form = modal.querySelector('.modal-form');
-            if (form) {
-                form.classList.remove('form-hidden');
-                // Небольшая задержка для плавной анимации (если она есть в CSS)
-                setTimeout(() => {
-                    form.classList.add('form-visible');
-                }, 10);
-            }
         }
 
-        // Функция закрытия
+        // Функция закрытия (ищем по классу auth-modal)
         function closeAllModals() {
             modalOverlay.classList.remove('active');
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.classList.remove('active');
-                const form = modal.querySelector('.modal-form');
-                if (form) {
-                    form.classList.remove('form-visible');
-                    form.classList.add('form-hidden');
-                }
-            });
+            document.querySelectorAll('.auth-modal').forEach(m => m.classList.remove('active'));
         }
 
-        // Функция переключения (Вход <-> Регистрация)
+        // Переключение
         function switchModal(targetModalId) {
             const targetModal = document.getElementById(targetModalId);
             if (!targetModal) return;
 
-            // Скрываем все текущие
-            document.querySelectorAll('.modal.active').forEach(m => {
-                m.classList.remove('active');
-                const f = m.querySelector('.modal-form');
-                if (f) f.classList.remove('form-visible');
-            });
+            // Скрываем все активные
+            document.querySelectorAll('.auth-modal.active').forEach(m => m.classList.remove('active'));
 
-            // Показываем целевое
+            // Открываем целевое
             targetModal.classList.add('active');
-            const targetForm = targetModal.querySelector('.modal-form');
-            if (targetForm) {
-                targetForm.classList.remove('form-hidden');
-                setTimeout(() => targetForm.classList.add('form-visible'), 10);
-            }
         }
 
         // Привязка событий
@@ -140,10 +115,7 @@
         });
     }
 
-    // 4. ЛОГИКА ВХОДА, РЕГИСТРАЦИИ И ПОДТВЕРЖДЕНИЯ
-    // (Здесь код для отправки данных на сервер)
-
-    // --- ВХОД ---
+    // 4. ЛОГИКА ФОРМ (Вход, Регистрация)
     const loginSubmitBtn = document.getElementById('login-submit-btn');
     if (loginSubmitBtn) {
         loginSubmitBtn.addEventListener('click', (e) => {
@@ -162,63 +134,54 @@
                     location.reload();
                 })
                 .catch(err => {
-                    const form = document.querySelector('#login-modal form');
+                    // Используем форму с новым классом auth-form
+                    const form = document.querySelector('#login-modal .auth-form');
                     if (errorContainer) displayErrors(err, errorContainer, form);
                 });
         });
     }
 
-    // --- РЕГИСТРАЦИЯ ---
     const registerSubmitBtn = document.getElementById('register-submit-btn');
     if (registerSubmitBtn) {
         registerSubmitBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const requestURL = '/Home/Register';
             const errorContainer = document.getElementById('register-error-container');
-
             const body = {
                 login: document.getElementById('register-login').value,
                 email: document.getElementById('register-email').value,
                 password: document.getElementById('register-password').value,
                 passwordConfirm: document.getElementById('register-passwordConfirm').value
             };
-
             if (errorContainer) errorContainer.innerHTML = '';
 
             sendRequest('POST', requestURL, body)
                 .then(data => {
                     console.log('Письмо отправлено:', data);
+                    closeAllModals();
+                    setTimeout(() => {
+                        modalOverlay.classList.add('active');
+                        confirmModal.classList.add('active');
+                    }, 50);
 
-                    // Закрываем регистрацию
-                    if (registerModal) {
-                        registerModal.classList.remove('active');
-                        registerModal.querySelector('.modal-form').classList.remove('form-visible');
-                    }
-
-                    // Открываем подтверждение
-                    if (confirmModal) openModal(confirmModal);
-
-                    // Заполняем скрытые поля
                     document.getElementById('confirm-login').value = data.login;
                     document.getElementById('confirm-email').value = data.email;
                     document.getElementById('confirm-password').value = data.password;
                     document.getElementById('confirm-generated-code').value = data.generatedCode;
                 })
                 .catch(err => {
-                    const form = document.querySelector('#register-modal form');
+                    const form = document.querySelector('#register-modal .auth-form');
                     if (errorContainer) displayErrors(err, errorContainer, form);
                 });
         });
     }
 
-    // --- ПОДТВЕРЖДЕНИЕ КОДА ---
     const confirmSubmitBtn = document.getElementById('confirm-submit-btn');
     if (confirmSubmitBtn) {
         confirmSubmitBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const requestURL = '/Home/ConfirmEmail';
             const errorContainer = document.getElementById('confirm-error-container');
-
             const body = {
                 codeConfirm: document.getElementById('confirm-code').value,
                 generatedCode: document.getElementById('confirm-generated-code').value,
@@ -226,7 +189,6 @@
                 email: document.getElementById('confirm-email').value,
                 password: document.getElementById('confirm-password').value
             };
-
             if (errorContainer) errorContainer.innerHTML = '';
 
             sendRequest('POST', requestURL, body)
@@ -235,44 +197,78 @@
                     location.reload();
                 })
                 .catch(err => {
-                    const form = document.querySelector('#confirm-email-modal form');
+                    const form = document.querySelector('#confirm-email-modal .auth-form');
                     if (errorContainer) displayErrors(err, errorContainer, form);
                 });
         });
     }
 
-    // 5. КАРУСЕЛЬ
+    // 5. КАРУСЕЛЬ (ИСПРАВЛЕННАЯ АВТОМАТИЧЕСКАЯ ПРОКРУТКА)
     const carouselWrapper = document.querySelector('.services-wrapper');
     if (carouselWrapper) {
-        let scrollInterval;
-        const scrollAmount = 1;
-        const scrollSpeed = 30;
-        let originalWidth = 0;
-        function setupInfiniteScroll() {
-            originalWidth = carouselWrapper.scrollWidth;
-            const originalCards = Array.from(carouselWrapper.children);
-            originalCards.forEach(card => {
-                const clone = card.cloneNode(true);
-                carouselWrapper.appendChild(clone);
-            });
-        }
-        function startScrolling() {
-            clearInterval(scrollInterval);
-            scrollInterval = setInterval(() => {
-                if (carouselWrapper.scrollLeft >= originalWidth) {
-                    carouselWrapper.scrollLeft = carouselWrapper.scrollLeft - originalWidth;
+        // Ждем полной загрузки страницы (включая картинки), чтобы правильно посчитать ширину
+        window.addEventListener('load', () => {
+            startInfiniteCarousel(carouselWrapper);
+        });
+    }
+
+    function startInfiniteCarousel(wrapper) {
+        // 1. Запоминаем реальную ширину контента ДО клонирования
+        const originalContentWidth = wrapper.scrollWidth;
+
+        // Если контента меньше, чем ширина экрана, крутить не нужно
+        if (originalContentWidth <= wrapper.clientWidth) return;
+
+        // 2. Клонируем карточки для эффекта бесконечности
+        const originalCards = Array.from(wrapper.children);
+        originalCards.forEach(card => {
+            const clone = card.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true'); // Для доступности
+            wrapper.appendChild(clone);
+        });
+
+        // 3. Настройки
+        let scrollPos = 0;
+        const speed = 1; // Скорость (пикселей за такт)
+        const intervalTime = 20; // Частота обновления (мс)
+        let isPaused = false;
+        let animationId;
+
+        // 4. Функция прокрутки
+        function scroll() {
+            if (!isPaused) {
+                scrollPos += speed;
+
+                // Если прокрутили на ширину оригинального набора -> сбрасываем в начало
+                if (scrollPos >= originalContentWidth) {
+                    scrollPos = 0;
+                    wrapper.scrollLeft = 0; // Мгновенный прыжок назад
                 } else {
-                    carouselWrapper.scrollLeft += scrollAmount;
+                    wrapper.scrollLeft = scrollPos;
                 }
-            }, scrollSpeed);
+            }
         }
-        function stopScrolling() { clearInterval(scrollInterval); }
-        setupInfiniteScroll();
-        startScrolling();
-        carouselWrapper.addEventListener('mouseenter', stopScrolling);
-        carouselWrapper.addEventListener('mouseleave', startScrolling);
-        const arrows = document.querySelectorAll('.arrow');
-        if (arrows) arrows.forEach(arrow => arrow.addEventListener('click', stopScrolling));
+
+        // 5. Запуск
+        animationId = setInterval(scroll, intervalTime);
+
+        // 6. Пауза при наведении
+        wrapper.addEventListener('mouseenter', () => {
+            isPaused = true;
+        });
+
+        wrapper.addEventListener('mouseleave', () => {
+            isPaused = false;
+            // Синхронизируем позицию (на случай, если пользователь покрутил колесиком)
+            scrollPos = wrapper.scrollLeft;
+        });
+
+        // Поддержка тач-устройств
+        wrapper.addEventListener('touchstart', () => { isPaused = true; });
+        wrapper.addEventListener('touchend', () => {
+            isPaused = false;
+            scrollPos = wrapper.scrollLeft;
+        });
     }
 });
 
@@ -285,34 +281,27 @@ function sendRequest(method, url, body = null) {
         headers: headers
     }).then(response => {
         if (!response.ok) {
-            return response.json().then(errorData => { throw errorData; })
-                .catch(() => { throw new Error('Ошибка сервера ' + response.status); });
+            return response.json().then(e => { throw e; }).catch(() => { throw new Error(response.status); });
         }
         return response.text().then(text => text ? JSON.parse(text) : {});
     });
 }
 
-function displayErrors(errors, errorContainer, formElement) {
-    errorContainer.innerHTML = '';
-    if (formElement) {
-        const inputs = formElement.querySelectorAll('input');
-        inputs.forEach(input => input.classList.remove('input-error'));
-    }
+function displayErrors(errors, container, form) {
+    container.innerHTML = '';
+    if (form) form.querySelectorAll('input').forEach(i => i.classList.remove('input-error'));
     if (errors.description) {
-        const msg = document.createElement('div');
-        msg.classList.add('error-message');
-        msg.style.color = 'red';
-        msg.textContent = errors.description;
-        errorContainer.appendChild(msg);
-        return;
+        const div = document.createElement('div');
+        div.className = 'error-message';
+        div.textContent = errors.description;
+        container.appendChild(div);
     }
     if (Array.isArray(errors)) {
-        errors.forEach(error => {
-            const msg = document.createElement('div');
-            msg.classList.add('error-message');
-            msg.style.color = 'red';
-            msg.textContent = error.message || error;
-            errorContainer.appendChild(msg);
+        errors.forEach(e => {
+            const div = document.createElement('div');
+            div.className = 'error-message';
+            div.textContent = e.message || e;
+            container.appendChild(div);
         });
     }
 }
