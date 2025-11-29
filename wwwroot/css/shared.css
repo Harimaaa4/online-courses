@@ -748,18 +748,22 @@ footer {
         }
 
 /* ОШИБКИ */
+/* Стили для ошибок (Глава 8) */
 .error-container {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .error-message {
     background: var(--error-bg);
     color: var(--error-text);
-    padding: 12px;
+    border: 1px solid var(--error-border);
+    padding: 10px 15px;
     border-radius: 8px;
     font-size: 14px;
+    font-weight: 500;
     margin-bottom: 8px;
     text-align: left;
+    display: block; /* Гарантирует видимость */
 }
 
 .auth-form input.input-error {

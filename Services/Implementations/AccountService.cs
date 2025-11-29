@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration; // Для чтения пароля из appsettings
+using Microsoft.Extensions.Configuration;
+using MimeKit;
+using MailKit.Net.Smtp;
 using online_courses.Domain;
+using online_courses.Domain.Helpers;
+using online_courses.Domain.Validators;
 using online_courses.Entities;
 using online_courses.Interfaces;
 using online_courses.Models;
@@ -9,14 +12,9 @@ using online_courses.Response;
 using online_courses.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Linq;
-using online_courses.Domain.Helpers;
-using FluentValidation;
-using online_courses.Domain.Validators;
-using MimeKit; // Для почты
-using MailKit.Net.Smtp; // Для отправки
 
 namespace online_courses.Services.Implementations
 {
@@ -24,7 +22,7 @@ namespace online_courses.Services.Implementations
     {
         private readonly IBaseStorage<UserDb> _userStorage;
         private readonly IMapper _mapper;
-        private readonly IConfiguration _config; // Добавили конфигурацию
+        private readonly IConfiguration _config;
 
         public AccountService(IBaseStorage<UserDb> userStorage, IMapper mapper, IConfiguration config)
         {
@@ -37,42 +35,45 @@ namespace online_courses.Services.Implementations
         {
             try
             {
-                // 1. Проверка существования
+                // 1. Проверка на существование
                 var users = await _userStorage.GetAllAsync();
                 if (users.Any(x => x.Email == model.Email))
                 {
                     return new BaseResponse<User>()
                     {
-                        Description = "Пользователь с такой почтой уже есть",
+                        Description = "Пользователь с такой почтой уже существует",
                         StatusCode = StatusCode.UserAlreadyExists
                     };
                 }
 
-                // 2. Маппинг и Валидация
+                // 2. Валидация (FluentValidation)
                 var newUser = _mapper.Map<User>(model);
-                var userValidator = new UserValidator();
-                var validationResult = await userValidator.ValidateAsync(newUser);
-                if (!validationResult.IsValid)
+                var validator = new UserValidator();
+                var valResult = await validator.ValidateAsync(newUser);
+
+                if (!valResult.IsValid)
                 {
                     return new BaseResponse<User>()
                     {
-                        Description = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage)),
+                        Description = string.Join("; ", valResult.Errors.Select(x => x.ErrorMessage)),
                         StatusCode = StatusCode.InternalServerError
                     };
                 }
 
-                // 3. Генерируем код и отправляем письмо
+                // 3. Генерация кода
                 Random random = new Random();
-                newUser.GeneratedCode = random.Next(10000, 99999).ToString(); // Код из 5 цифр
+                newUser.GeneratedCode = random.Next(10000, 99999).ToString();
 
+                // 4. Отправка письма
                 await SendMessage(newUser.Email, "Код подтверждения", $"Ваш код: {newUser.GeneratedCode}");
 
-                // 4. Хешируем пароль, но В БАЗУ ПОКА НЕ ПИШЕМ
-                newUser.Password = HashPasswordHelper.HashPass(model.Password);
+                // Пароль пока НЕ хешируем здесь, так как он вернется с фронта при подтверждении
+                // Или хешируем, но в ConfirmEmail всё равно придется перехешировать, если он придет чистым.
+                // Для надежности будем хешировать перед записью в БД (в ConfirmEmail).
 
                 return new BaseResponse<User>()
                 {
-                    Data = newUser, // Возвращаем пользователя с кодом, чтобы передать его на фронт
+                    Data = newUser,
                     Description = "Письмо отправлено",
                     StatusCode = StatusCode.OK
                 };
@@ -87,23 +88,26 @@ namespace online_courses.Services.Implementations
             }
         }
 
-        // Новый метод подтверждения
         public async Task<BaseResponse<ClaimsIdentity>> ConfirmEmail(User user, string code)
         {
             try
             {
-                // Проверяем код
                 if (user.GeneratedCode != code)
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
-                        Description = "Неверный код",
+                        Description = "Неверный код подтверждения",
                         StatusCode = StatusCode.InternalServerError
                     };
                 }
 
-                // Если код верен - сохраняем в базу
+                // !!! ВАЖНОЕ ИСПРАВЛЕНИЕ !!!
+                // Хешируем пароль перед сохранением в базу
+                user.Password = HashPasswordHelper.HashPass(user.Password);
+
+                user.Role = "User";
                 var userDb = _mapper.Map<UserDb>(user);
+
                 await _userStorage.AddAsync(userDb);
 
                 var result = Authenticate(user);
@@ -111,7 +115,7 @@ namespace online_courses.Services.Implementations
                 return new BaseResponse<ClaimsIdentity>()
                 {
                     Data = result,
-                    Description = "Регистрация завершена",
+                    Description = "Регистрация успешна",
                     StatusCode = StatusCode.OK
                 };
             }
@@ -132,11 +136,12 @@ namespace online_courses.Services.Implementations
                 var users = await _userStorage.GetAllAsync();
                 var user = users.FirstOrDefault(x => x.Email == model.Email);
 
+                // Проверка: существует ли пользователь И совпадает ли хеш пароля
                 if (user == null || user.Password != HashPasswordHelper.HashPass(model.Password))
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
-                        Description = "Неверный логин или пароль",
+                        Description = "Неверная почта или пароль",
                         StatusCode = StatusCode.UserNotFound
                     };
                 }
@@ -171,27 +176,34 @@ namespace online_courses.Services.Implementations
                 ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
         }
 
-        // Метод отправки письма
         private async Task SendMessage(string email, string subject, string message)
         {
-            var emailMessage = new MimeMessage();
-            string fromEmail = _config["Gmail:Email"];
-            string fromPassword = _config["Gmail:Password"];
-
-            emailMessage.From.Add(new MailboxAddress("Онлайн Курсы", fromEmail));
-            emailMessage.To.Add(new MailboxAddress("", email));
-            emailMessage.Subject = subject;
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+            try
             {
-                Text = message
-            };
+                var emailMessage = new MimeMessage();
+                string fromEmail = _config["Gmail:Email"];
+                string fromPassword = _config["Gmail:Password"];
 
-            using (var client = new SmtpClient())
+                emailMessage.From.Add(new MailboxAddress("Онлайн Курсы", fromEmail));
+                emailMessage.To.Add(new MailboxAddress("", email));
+                emailMessage.Subject = subject;
+                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+                {
+                    Text = message
+                };
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.gmail.com", 465, true);
+                    await client.AuthenticateAsync(fromEmail, fromPassword);
+                    await client.SendAsync(emailMessage);
+                    await client.DisconnectAsync(true);
+                }
+            }
+            catch (Exception ex)
             {
-                await client.ConnectAsync("smtp.gmail.com", 465, true);
-                await client.AuthenticateAsync(fromEmail, fromPassword);
-                await client.SendAsync(emailMessage);
-                await client.DisconnectAsync(true);
+                // Можно добавить логирование
+                throw new Exception("Ошибка отправки почты: " + ex.Message);
             }
         }
     }

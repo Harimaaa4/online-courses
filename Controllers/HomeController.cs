@@ -58,37 +58,56 @@ namespace online_courses.Controllers
             return View();
         }
 
-        // === МЕТОДЫ АВТОРИЗАЦИИ И РЕГИСТРАЦИИ ===
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Contact(string Name, string Email, string Subject, string Message)
+        {
+            if (ModelState.IsValid && !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Email))
+            {
+                // Здесь можно добавить логику отправки сообщения администратору
+                TempData["Success"] = $"Спасибо, {Name}! Мы свяжемся с вами скоро.";
+            }
+            else
+            {
+                TempData["Success"] = "Пожалуйста, заполните все обязательные поля корректно.";
+            }
 
+            return RedirectToAction("Contact");
+        }
+
+        // =============================================
+        // МЕТОДЫ АВТОРИЗАЦИИ И РЕГИСТРАЦИИ
+        // =============================================
+
+        // 1. РЕГИСТРАЦИЯ (Отправка письма)
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
+            // Проверка стандартных атрибутов ([Required], [MinLength] и т.д.)
             if (ModelState.IsValid)
             {
-                // 1. Вызываем сервис. Он отправит письмо, но НЕ сохранит в базу пока что.
+                // Вызов сервиса (валидация FluentValidation внутри)
                 var response = await _accountService.Register(model);
 
                 if (response.StatusCode == online_courses.Response.StatusCode.OK)
                 {
-                    // 2. Если письмо ушло успешно, готовим данные для подтверждения
-                    // Мы "запоминаем" сгенерированный код и данные пользователя, чтобы передать их на фронтенд
-                    // (Примечание: в реальных проектах код на фронт лучше не передавать в открытую, но делаем по методике)
-
-                    // Ручной маппинг или через AutoMapper (если настроили)
+                    // Успех -> формируем данные для окна подтверждения
                     var confirmModel = new ConfirmEmailViewModel
                     {
                         Email = model.Email,
                         Login = model.Login,
-                        Password = model.Password,
+                        Password = model.Password, // Передаем пароль, чтобы сохранить его позже
                         PasswordConfirm = model.PasswordConfirm,
-                        GeneratedCode = response.Data.GeneratedCode // Берем код из ответа сервиса
+                        GeneratedCode = response.Data.GeneratedCode // Код из сервиса
                     };
-
-                    return Ok(confirmModel); // Отправляем это обратно в JavaScript
+                    return Ok(confirmModel);
                 }
+
+                // Ошибка от сервиса (например, "Почта занята")
                 return BadRequest(new { description = response.Description });
             }
 
+            // Сбор ошибок валидации модели в одну строку для JS
             var errors = string.Join("; ", ModelState.Values
                 .SelectMany(v => v.Errors)
                 .Select(e => e.ErrorMessage));
@@ -96,43 +115,33 @@ namespace online_courses.Controllers
             return BadRequest(new { description = errors });
         }
 
-        // НОВЫЙ МЕТОД: Подтверждение почты
+        // 2. ПОДТВЕРЖДЕНИЕ ПОЧТЫ (Финальная регистрация)
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailViewModel model)
         {
-            // Превращаем ViewModel обратно в доменную модель User
             var user = new online_courses.Domain.User
             {
                 Email = model.Email,
                 Login = model.Login,
-                // Пароль уже захеширован в сервисе Register? 
-                // В нашей реализации Register в AccountService мы хешировали newUser.Password.
-                // Но response.Data вернул объект с уже захешированным паролем?
-                // В AccountService.Register мы делали: newUser.Password = HashHelper(pass); return ... Data = newUser;
-                // Значит в model.Password сейчас лежит уже ХЕШ?
-                // Нет, с фронта придет то, что мы отправили. 
-                // ВАЖНО: AccountService.ConfirmEmail снова вызывает Authenticate(user).
-                // Давайте доверимся сервису.
                 Password = model.Password,
                 GeneratedCode = model.GeneratedCode,
                 Role = "User"
             };
 
-            // Вызываем финальное подтверждение в сервисе
             var response = await _accountService.ConfirmEmail(user, model.CodeConfirm);
 
             if (response.StatusCode == online_courses.Response.StatusCode.OK)
             {
-                // Если всё ок - выдаем куки (входим на сайт)
+                // Входим в систему (выдаем куки)
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(response.Data));
 
                 return Ok(new { description = response.Description });
             }
-
             return BadRequest(new { description = response.Description });
         }
 
+        // 3. ВХОД
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
@@ -144,7 +153,7 @@ namespace online_courses.Controllers
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(response.Data));
 
-                    return Ok(new { description = response.Description });
+                    return Ok(new { description = "Успешный вход" });
                 }
                 return BadRequest(new { description = response.Description });
             }
@@ -155,12 +164,18 @@ namespace online_courses.Controllers
 
             return BadRequest(new { description = errors });
         }
-        // Метод выхода из системы
+
+        // 4. ВЫХОД
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
-    }
 
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
 }

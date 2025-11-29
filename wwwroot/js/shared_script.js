@@ -281,25 +281,42 @@ function sendRequest(method, url, body = null) {
         headers: headers
     }).then(response => {
         if (!response.ok) {
-            return response.json().then(e => { throw e; }).catch(() => { throw new Error(response.status); });
+            // Сначала пробуем прочитать JSON с ошибкой
+            return response.json()
+                .catch(() => {
+                    // Если JSON не прочитался (сервер вернул просто текст или пустоту)
+                    throw new Error('Ошибка сервера ' + response.status);
+                })
+                .then(errorData => {
+                    // Если JSON прочитался, бросаем его как ошибку, чтобы поймать в основном коде
+                    throw errorData;
+                });
         }
         return response.text().then(text => text ? JSON.parse(text) : {});
     });
 }
-
 function displayErrors(errors, container, form) {
+    console.log('Отображаю ошибки:', errors); // ЭТО ПОКАЖЕТ ОШИБКУ В КОНСОЛИ (F12)
+
+    if (!container) return;
     container.innerHTML = '';
-    if (form) form.querySelectorAll('input').forEach(i => i.classList.remove('input-error'));
+
+    if (form) {
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => input.classList.remove('input-error'));
+    }
+
     if (errors.description) {
         const div = document.createElement('div');
-        div.className = 'error-message';
+        div.className = 'error-message'; // Убедитесь, что тут error-message
         div.textContent = errors.description;
         container.appendChild(div);
     }
+
     if (Array.isArray(errors)) {
         errors.forEach(e => {
             const div = document.createElement('div');
-            div.className = 'error-message';
+            div.className = 'error-message'; // И тут error-message
             div.textContent = e.message || e;
             container.appendChild(div);
         });
