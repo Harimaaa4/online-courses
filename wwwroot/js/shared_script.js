@@ -321,4 +321,14 @@ function displayErrors(errors, container, form) {
             container.appendChild(div);
         });
     }
+
+}
+// --- GOOGLE LOGIN ---
+const googleLoginBtn = document.getElementById('google-login-btn');
+if (googleLoginBtn) {
+    googleLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Просто переходим по ссылке на метод контроллера
+        window.location.href = '/Home/AuthenticationGoogle';
+    });
 }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration; 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using online_courses.Data;
@@ -12,8 +12,6 @@ using online_courses.Interfaces;
 using online_courses.Repositories;
 using online_courses.Services.Implementations;
 using online_courses.Services.Interfaces;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,22 +23,33 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IBaseStorage<UserDb>, UserStorage>();
-builder.Services.AddScoped<IBaseStorage<CategoryDb>, CategoryStorage>(); // Новое
-builder.Services.AddScoped<IBaseStorage<CourseDb>, CourseStorage>();     // Новое
+builder.Services.AddScoped<IBaseStorage<CategoryDb>, CategoryStorage>();
+builder.Services.AddScoped<IBaseStorage<CourseDb>, CourseStorage>();
 
 // Подключение AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
 // Подключение Сервиса Аккаунта
 builder.Services.AddScoped<IAccountService, AccountService>();
-// Добавляем аутентификацию с использованием куки
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Home/Login");
-        options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Home/Index");
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Разрешить куки без HTTPS
-    });
+
+// === АУТЕНТИФИКАЦИЯ (Cookie + Google) ===
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie(options =>
+{
+    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Home/Login");
+    options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Home/Index");
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Разрешить куки без HTTPS
+})
+.AddGoogle(options =>
+{
+    // Берем ключи из конфигурации (secrets.json или appsettings.json)
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+});
 
 var app = builder.Build();
 
@@ -57,8 +66,9 @@ else
 
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
+
+app.UseAuthentication(); // Сначала проверяем, кто это
+app.UseAuthorization();  // Потом проверяем, можно ли ему сюда
 
 app.MapControllerRoute(
     name: "default",

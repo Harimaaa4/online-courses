@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google; // Один раз
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using online_courses.Models;
 using online_courses.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System; // Для Guid
 using System.Linq;
-using System.Threading.Tasks;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace online_courses.Controllers
 {
@@ -24,37 +24,17 @@ namespace online_courses.Controllers
             _accountService = accountService;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult SiteInformation()
-        {
-            return View();
-        }
-
-        public IActionResult Courses()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
+        public IActionResult SiteInformation() => View();
+        public IActionResult Courses() => View();
+        public IActionResult Privacy() => View();
 
         [HttpGet]
         public IActionResult Contact()
         {
             ViewData["ActivePage"] = "Contact";
             ViewData["ShowHeaderImage"] = "false";
-
-            if (TempData["Success"] != null)
-            {
-                ViewData["Success"] = TempData["Success"];
-            }
-
+            if (TempData["Success"] != null) ViewData["Success"] = TempData["Success"];
             return View();
         }
 
@@ -63,59 +43,40 @@ namespace online_courses.Controllers
         public IActionResult Contact(string Name, string Email, string Subject, string Message)
         {
             if (ModelState.IsValid && !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Email))
-            {
-                // Здесь можно добавить логику отправки сообщения администратору
                 TempData["Success"] = $"Спасибо, {Name}! Мы свяжемся с вами скоро.";
-            }
             else
-            {
                 TempData["Success"] = "Пожалуйста, заполните все обязательные поля корректно.";
-            }
-
             return RedirectToAction("Contact");
         }
 
         // =============================================
-        // МЕТОДЫ АВТОРИЗАЦИИ И РЕГИСТРАЦИИ
+        // AUTH METHODS
         // =============================================
 
-        // 1. РЕГИСТРАЦИЯ (Отправка письма)
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
-            // Проверка стандартных атрибутов ([Required], [MinLength] и т.д.)
             if (ModelState.IsValid)
             {
-                // Вызов сервиса (валидация FluentValidation внутри)
                 var response = await _accountService.Register(model);
-
                 if (response.StatusCode == online_courses.Response.StatusCode.OK)
                 {
-                    // Успех -> формируем данные для окна подтверждения
                     var confirmModel = new ConfirmEmailViewModel
                     {
                         Email = model.Email,
                         Login = model.Login,
-                        Password = model.Password, // Передаем пароль, чтобы сохранить его позже
+                        Password = model.Password,
                         PasswordConfirm = model.PasswordConfirm,
-                        GeneratedCode = response.Data.GeneratedCode // Код из сервиса
+                        GeneratedCode = response.Data.GeneratedCode
                     };
                     return Ok(confirmModel);
                 }
-
-                // Ошибка от сервиса (например, "Почта занята")
                 return BadRequest(new { description = response.Description });
             }
-
-            // Сбор ошибок валидации модели в одну строку для JS
-            var errors = string.Join("; ", ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage));
-
+            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
             return BadRequest(new { description = errors });
         }
 
-        // 2. ПОДТВЕРЖДЕНИЕ ПОЧТЫ (Финальная регистрация)
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailViewModel model)
         {
@@ -132,16 +93,13 @@ namespace online_courses.Controllers
 
             if (response.StatusCode == online_courses.Response.StatusCode.OK)
             {
-                // Входим в систему (выдаем куки)
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(response.Data));
-
                 return Ok(new { description = response.Description });
             }
             return BadRequest(new { description = response.Description });
         }
 
-        // 3. ВХОД
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
@@ -152,20 +110,14 @@ namespace online_courses.Controllers
                 {
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(response.Data));
-
                     return Ok(new { description = "Успешный вход" });
                 }
                 return BadRequest(new { description = response.Description });
             }
-
-            var errors = string.Join("; ", ModelState.Values
-                .SelectMany(v => v.Errors)
-                .Select(e => e.ErrorMessage));
-
+            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
             return BadRequest(new { description = errors });
         }
 
-        // 4. ВЫХОД
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -176,6 +128,51 @@ namespace online_courses.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        // =============================================
+        // GOOGLE AUTH
+        // =============================================
+
+        public async Task AuthenticationGoogle()
+        {
+            await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme,
+                new AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") });
+        }
+
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (!result.Succeeded) result = await HttpContext.AuthenticateAsync("Google");
+
+            if (result?.Principal != null)
+            {
+                var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
+                var name = result.Principal.FindFirst(ClaimTypes.Name)?.Value;
+
+                if (email != null)
+                {
+                    var user = new online_courses.Domain.User
+                    {
+                        Login = name ?? email,
+                        Email = email,
+                        Password = Guid.NewGuid().ToString(), // Случайный пароль
+                        Role = "User"
+                    };
+
+                    // Здесь вызываем метод IsCreatedAccount.
+                    // Он принимает Domain.User, как и положено.
+                    var response = await _accountService.IsCreatedAccount(user);
+
+                    if (response.StatusCode == online_courses.Response.StatusCode.OK)
+                    {
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                            new ClaimsPrincipal(response.Data));
+                        return RedirectToAction("Index");
+                    }
+                }
+            }
+            return RedirectToAction("Index");
         }
     }
 }

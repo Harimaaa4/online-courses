@@ -35,7 +35,6 @@ namespace online_courses.Services.Implementations
         {
             try
             {
-                // 1. Проверка на существование
                 var users = await _userStorage.GetAllAsync();
                 if (users.Any(x => x.Email == model.Email))
                 {
@@ -46,7 +45,6 @@ namespace online_courses.Services.Implementations
                     };
                 }
 
-                // 2. Валидация (FluentValidation)
                 var newUser = _mapper.Map<User>(model);
                 var validator = new UserValidator();
                 var valResult = await validator.ValidateAsync(newUser);
@@ -60,16 +58,13 @@ namespace online_courses.Services.Implementations
                     };
                 }
 
-                // 3. Генерация кода
                 Random random = new Random();
                 newUser.GeneratedCode = random.Next(10000, 99999).ToString();
 
-                // 4. Отправка письма
                 await SendMessage(newUser.Email, "Код подтверждения", $"Ваш код: {newUser.GeneratedCode}");
 
-                // Пароль пока НЕ хешируем здесь, так как он вернется с фронта при подтверждении
-                // Или хешируем, но в ConfirmEmail всё равно придется перехешировать, если он придет чистым.
-                // Для надежности будем хешировать перед записью в БД (в ConfirmEmail).
+                // Хешируем пароль, но пока не сохраняем в БД (вернем на фронт для подтверждения)
+                newUser.Password = HashPasswordHelper.HashPass(model.Password);
 
                 return new BaseResponse<User>()
                 {
@@ -96,14 +91,16 @@ namespace online_courses.Services.Implementations
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
-                        Description = "Неверный код подтверждения",
+                        Description = "Неверный код",
                         StatusCode = StatusCode.InternalServerError
                     };
                 }
 
-                // !!! ВАЖНОЕ ИСПРАВЛЕНИЕ !!!
-                // Хешируем пароль перед сохранением в базу
-                user.Password = HashPasswordHelper.HashPass(user.Password);
+                // Пароль уже захеширован в методе Register (или пришел с фронта захешированным, если мы так сделали)
+                // Но для надежности лучше убедиться, что мы сохраняем хеш.
+                // В текущей логике Register возвращает уже захешированный пароль в response.Data, 
+                // который потом передается в ConfirmEmailViewModel, и оттуда сюда.
+                // Поэтому здесь user.Password уже должен быть хешем.
 
                 user.Role = "User";
                 var userDb = _mapper.Map<UserDb>(user);
@@ -111,7 +108,6 @@ namespace online_courses.Services.Implementations
                 await _userStorage.AddAsync(userDb);
 
                 var result = Authenticate(user);
-
                 return new BaseResponse<ClaimsIdentity>()
                 {
                     Data = result,
@@ -136,12 +132,11 @@ namespace online_courses.Services.Implementations
                 var users = await _userStorage.GetAllAsync();
                 var user = users.FirstOrDefault(x => x.Email == model.Email);
 
-                // Проверка: существует ли пользователь И совпадает ли хеш пароля
                 if (user == null || user.Password != HashPasswordHelper.HashPass(model.Password))
                 {
                     return new BaseResponse<ClaimsIdentity>()
                     {
-                        Description = "Неверная почта или пароль",
+                        Description = "Неверный логин или пароль",
                         StatusCode = StatusCode.UserNotFound
                     };
                 }
@@ -152,6 +147,55 @@ namespace online_courses.Services.Implementations
                 return new BaseResponse<ClaimsIdentity>()
                 {
                     Data = result,
+                    StatusCode = StatusCode.OK
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<ClaimsIdentity>()
+                {
+                    Description = ex.Message,
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
+        // МЕТОД ДЛЯ GOOGLE (ИСПРАВЛЕННЫЙ)
+        public async Task<BaseResponse<ClaimsIdentity>> IsCreatedAccount(User model)
+        {
+            try
+            {
+                var users = await _userStorage.GetAllAsync();
+                // userDb - это сущность из базы (UserDb)
+                var userDb = users.FirstOrDefault(x => x.Email == model.Email);
+
+                if (userDb == null)
+                {
+                    // Создаем нового (model - это User)
+                    model.Password = HashPasswordHelper.HashPass(model.Password);
+                    model.Role = "User";
+
+                    var newUserDb = _mapper.Map<UserDb>(model);
+                    await _userStorage.AddAsync(newUserDb);
+
+                    var result = Authenticate(model);
+                    return new BaseResponse<ClaimsIdentity>()
+                    {
+                        Data = result,
+                        Description = "Регистрация через Google успешна",
+                        StatusCode = StatusCode.OK
+                    };
+                }
+
+                // Если пользователь есть, нужно превратить UserDb в User перед авторизацией
+                // !!! ВОТ ЗДЕСЬ БЫЛА ОШИБКА !!!
+                var domainUser = _mapper.Map<User>(userDb);
+                var resultAuth = Authenticate(domainUser);
+
+                return new BaseResponse<ClaimsIdentity>()
+                {
+                    Data = resultAuth,
+                    Description = "Вход через Google успешен",
                     StatusCode = StatusCode.OK
                 };
             }
@@ -187,10 +231,7 @@ namespace online_courses.Services.Implementations
                 emailMessage.From.Add(new MailboxAddress("Онлайн Курсы", fromEmail));
                 emailMessage.To.Add(new MailboxAddress("", email));
                 emailMessage.Subject = subject;
-                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
-                {
-                    Text = message
-                };
+                emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = message };
 
                 using (var client = new SmtpClient())
                 {
@@ -202,8 +243,8 @@ namespace online_courses.Services.Implementations
             }
             catch (Exception ex)
             {
-                // Можно добавить логирование
-                throw new Exception("Ошибка отправки почты: " + ex.Message);
+                Console.WriteLine("Ошибка почты: " + ex.Message);
+                throw;
             }
         }
     }

@@ -15,5 +15,8 @@ namespace online_courses.Services.Interfaces
 
         // Новый метод для финального подтверждения
         Task<BaseResponse<ClaimsIdentity>> ConfirmEmail(User user, string code);
+        
+        //МЕТОД ДЛЯ GOOGLE
+        Task<BaseResponse<ClaimsIdentity>> IsCreatedAccount(User model);
     }
 }
