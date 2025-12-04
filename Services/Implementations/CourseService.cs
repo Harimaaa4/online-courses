@@ -28,7 +28,6 @@ namespace online_courses.Services.Implementations
             try
             {
                 var allCourses = await _courseStorage.GetAllAsync();
-                // Фильтруем: берем только те, у которых CategoryId совпадает
                 var courses = allCourses.Where(x => x.CategoryId == categoryId).ToList();
 
                 return new BaseResponse<List<Course>>()
@@ -46,23 +45,28 @@ namespace online_courses.Services.Implementations
                 };
             }
         }
+
         public async Task<BaseResponse<List<Course>>> GetCoursesByFilter(CourseFilter filter)
         {
             try
             {
-                // 1. Берем все курсы (в реальном проекте лучше фильтровать в SQL, но для учебы пойдет так)
                 var allCourses = await _courseStorage.GetAllAsync();
 
-                // 2. Фильтруем по Категории
+                // 1. Фильтр по категории
                 var query = allCourses.Where(x => x.CategoryId == filter.CategoryId);
 
-                // 3. Фильтруем по Цене
+                // 2. Фильтр по цене
                 query = query.Where(x => x.Price >= filter.MinPrice && x.Price <= filter.MaxPrice);
 
-                // 4. Фильтруем по Уровню (если выбраны галочки)
+                // 3. НОВОЕ: Поиск по названию (Глава 25)
+                if (!string.IsNullOrWhiteSpace(filter.SearchQuery))
+                {
+                    query = query.Where(x => x.Name.Contains(filter.SearchQuery, StringComparison.OrdinalIgnoreCase));
+                }
+
+                // 4. Фильтр по уровню
                 if (filter.Levels != null && filter.Levels.Count > 0)
                 {
-                    // Оставляем только те курсы, уровень которых есть в списке выбранных
                     query = query.Where(x => filter.Levels.Contains(x.Level));
                 }
 
@@ -79,16 +83,13 @@ namespace online_courses.Services.Implementations
                         query = query.OrderByDescending(x => x.Rating);
                         break;
                     default:
-                        // По умолчанию (например, по имени)
                         query = query.OrderBy(x => x.Name);
                         break;
                 }
 
-                var resultList = query.ToList();
-
                 return new BaseResponse<List<Course>>()
                 {
-                    Data = _mapper.Map<List<Course>>(resultList),
+                    Data = _mapper.Map<List<Course>>(query.ToList()),
                     StatusCode = StatusCode.OK
                 };
             }
@@ -101,12 +102,12 @@ namespace online_courses.Services.Implementations
                 };
             }
         }
+
         public async Task<BaseResponse<Course>> GetCourse(Guid id)
         {
             try
             {
                 var course = await _courseStorage.GetAsync(id);
-
                 if (course == null)
                 {
                     return new BaseResponse<Course>()
@@ -115,7 +116,6 @@ namespace online_courses.Services.Implementations
                         StatusCode = StatusCode.UserNotFound
                     };
                 }
-
                 return new BaseResponse<Course>()
                 {
                     Data = _mapper.Map<Course>(course),

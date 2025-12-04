@@ -6,11 +6,19 @@
 
 <div class="container-section">
     <h2 class="info-section">Доступные курсы</h2>
+    <p class="text" style="text-align: center;">Выберите курс для подробного изучения</p>
 </div>
 
 <div class="courses-page-container">
 
     <aside class="filters-sidebar">
+
+        <div class="filter-group">
+            <h3>Поиск</h3>
+            <input type="text" id="search-input" placeholder="Название курса..."
+                   style="width: 100%; padding: 10px; border: 1px solid var(--border-color-input); border-radius: 8px;">
+        </div>
+
         <div class="filter-group">
             <h3>Цена</h3>
             <div class="range-slider">
@@ -53,10 +61,10 @@
             </select>
         </div>
 
-        @if (Model != null && Model.Any())
-        {
-            <div class="courses-list-container">
-                @foreach (var course in Model)
+        <div class="courses-list-container">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var course in Model)
                 {
                     <div class="course-item">
                         <div class="course-img">
@@ -76,13 +84,16 @@
                         </div>
                     </div>
                 }
-            </div>
-        }
-        else
-        {
-            <div style="text-align: center; margin-top: 50px;">
-                <p style="font-size: 1.2rem; color: var(--text-secondary);">Курсы не найдены.</p>
-            </div>
-        }
+            }
+            else
+            {
+                <div style="text-align: center; margin-top: 50px; width: 100%;">
+                    <p style="font-size: 1.2rem; color: var(--text-secondary);">В этой категории пока нет курсов.</p>
+                    <div style="margin-top: 20px;">
+                        <a asp-controller="Home" asp-action="Courses" class="button secondary">Вернуться к категориям</a>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 </div>

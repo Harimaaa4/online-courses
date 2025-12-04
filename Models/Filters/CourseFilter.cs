@@ -12,5 +12,7 @@ namespace online_courses.Models.Filters
 
         // Для сортировки
         public string SortType { get; set; } // "price_asc", "rating", и т.д.
+        //Для поиска
+        public string SearchQuery { get; set; }
     }
 }

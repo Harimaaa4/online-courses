@@ -11,50 +11,36 @@
         }
     });
 
-    // 2. МОДАЛЬНЫЕ ОКНА (НОВЫЕ КЛАССЫ: AUTH-MODAL)
+    // 2. МОДАЛЬНЫЕ ОКНА
     const modalOverlay = document.getElementById('modal-overlay');
     const loginModal = document.getElementById('login-modal');
     const registerModal = document.getElementById('register-modal');
     const confirmModal = document.getElementById('confirm-email-modal');
-
     const openLoginBtn = document.getElementById('open-login-modal');
     const openRegisterBtn = document.getElementById('open-register-modal');
-
     const closeBtns = document.querySelectorAll('[data-close-modal]');
     const switchBtns = document.querySelectorAll('[data-switch-modal]');
 
     if (modalOverlay) {
-        // Функция открытия
         function openModal(modal) {
             if (!modal) return;
             modalOverlay.classList.add('active');
             modal.classList.add('active');
         }
-
-        // Функция закрытия (ищем по классу auth-modal)
         function closeAllModals() {
             modalOverlay.classList.remove('active');
             document.querySelectorAll('.auth-modal').forEach(m => m.classList.remove('active'));
         }
-
-        // Переключение
         function switchModal(targetModalId) {
             const targetModal = document.getElementById(targetModalId);
             if (!targetModal) return;
-
-            // Скрываем все активные
             document.querySelectorAll('.auth-modal.active').forEach(m => m.classList.remove('active'));
-
-            // Открываем целевое
             targetModal.classList.add('active');
         }
-
-        // Привязка событий
         if (openLoginBtn) openLoginBtn.addEventListener('click', () => openModal(loginModal));
         if (openRegisterBtn) openRegisterBtn.addEventListener('click', () => openModal(registerModal));
-
         closeBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
-
+        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeAllModals(); });
         switchBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -62,37 +48,18 @@
                 switchModal(targetId);
             });
         });
-
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeAllModals();
-        });
     }
 
     // 3. ГАМБУРГЕР И ТЕМА
     const hamburger = document.getElementById('hamburger-menu');
     const sideMenu = document.getElementById('side-menu');
     if (hamburger && sideMenu) {
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            sideMenu.classList.toggle('active');
-        });
+        hamburger.addEventListener('click', () => { hamburger.classList.toggle('active'); sideMenu.classList.toggle('active'); });
     }
     const sideLoginBtn = document.getElementById('side-open-login');
     const sideRegisterBtn = document.getElementById('side-open-register');
-    if (sideLoginBtn && openLoginBtn) {
-        sideLoginBtn.addEventListener('click', () => {
-            openLoginBtn.click();
-            hamburger.classList.remove('active');
-            sideMenu.classList.remove('active');
-        });
-    }
-    if (sideRegisterBtn && openRegisterBtn) {
-        sideRegisterBtn.addEventListener('click', () => {
-            openRegisterBtn.click();
-            hamburger.classList.remove('active');
-            sideMenu.classList.remove('active');
-        });
-    }
+    if (sideLoginBtn && openLoginBtn) sideLoginBtn.addEventListener('click', () => { openLoginBtn.click(); });
+    if (sideRegisterBtn && openRegisterBtn) sideRegisterBtn.addEventListener('click', () => { openRegisterBtn.click(); });
 
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
@@ -103,227 +70,138 @@
             if (sunIcon) sunIcon.style.display = isDark ? 'none' : 'inline';
             if (moonIcon) moonIcon.style.display = isDark ? 'inline' : 'none';
         }
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-        }
+        if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
         updateThemeIcons();
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
             updateThemeIcons();
         });
     }
 
-    // 4. ЛОГИКА ФОРМ (Вход, Регистрация)
+    // 4. ЛОГИКА ФОРМ
     const loginSubmitBtn = document.getElementById('login-submit-btn');
     if (loginSubmitBtn) {
         loginSubmitBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const requestURL = '/Home/Login';
-            const errorContainer = document.getElementById('login-error-container');
-            const body = {
-                email: document.getElementById('login-email').value,
-                password: document.getElementById('login-password').value
-            };
-            if (errorContainer) errorContainer.innerHTML = '';
-
-            sendRequest('POST', requestURL, body)
-                .then(data => {
-                    console.log('Вход успешен:', data);
-                    location.reload();
-                })
-                .catch(err => {
-                    // Используем форму с новым классом auth-form
-                    const form = document.querySelector('#login-modal .auth-form');
-                    if (errorContainer) displayErrors(err, errorContainer, form);
-                });
+            sendAuthRequest('/Home/Login', 'login');
         });
     }
-
     const registerSubmitBtn = document.getElementById('register-submit-btn');
     if (registerSubmitBtn) {
         registerSubmitBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const requestURL = '/Home/Register';
-            const errorContainer = document.getElementById('register-error-container');
-            const body = {
-                login: document.getElementById('register-login').value,
-                email: document.getElementById('register-email').value,
-                password: document.getElementById('register-password').value,
-                passwordConfirm: document.getElementById('register-passwordConfirm').value
-            };
-            if (errorContainer) errorContainer.innerHTML = '';
-
-            sendRequest('POST', requestURL, body)
-                .then(data => {
-                    console.log('Письмо отправлено:', data);
-                    closeAllModals();
-                    setTimeout(() => {
-                        modalOverlay.classList.add('active');
-                        confirmModal.classList.add('active');
-                    }, 50);
-
-                    document.getElementById('confirm-login').value = data.login;
-                    document.getElementById('confirm-email').value = data.email;
-                    document.getElementById('confirm-password').value = data.password;
-                    document.getElementById('confirm-generated-code').value = data.generatedCode;
-                })
-                .catch(err => {
-                    const form = document.querySelector('#register-modal .auth-form');
-                    if (errorContainer) displayErrors(err, errorContainer, form);
-                });
+            sendAuthRequest('/Home/Register', 'register');
         });
     }
-
     const confirmSubmitBtn = document.getElementById('confirm-submit-btn');
     if (confirmSubmitBtn) {
         confirmSubmitBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const requestURL = '/Home/ConfirmEmail';
-            const errorContainer = document.getElementById('confirm-error-container');
-            const body = {
-                codeConfirm: document.getElementById('confirm-code').value,
-                generatedCode: document.getElementById('confirm-generated-code').value,
-                login: document.getElementById('confirm-login').value,
-                email: document.getElementById('confirm-email').value,
-                password: document.getElementById('confirm-password').value
-            };
-            if (errorContainer) errorContainer.innerHTML = '';
-
-            sendRequest('POST', requestURL, body)
-                .then(data => {
-                    console.log('Успех:', data);
-                    location.reload();
-                })
-                .catch(err => {
-                    const form = document.querySelector('#confirm-email-modal .auth-form');
-                    if (errorContainer) displayErrors(err, errorContainer, form);
-                });
+            sendAuthRequest('/Home/ConfirmEmail', 'confirm');
         });
     }
 
-    // 5. КАРУСЕЛЬ (ИСПРАВЛЕННАЯ АВТОМАТИЧЕСКАЯ ПРОКРУТКА)
+    function sendAuthRequest(url, type) {
+        let body = {};
+        let errorContainer;
+        if (type === 'login') {
+            body = { email: document.getElementById('login-email').value, password: document.getElementById('login-password').value };
+            errorContainer = document.getElementById('login-error-container');
+        } else if (type === 'register') {
+            body = {
+                login: document.getElementById('register-login').value, email: document.getElementById('register-email').value,
+                password: document.getElementById('register-password').value, passwordConfirm: document.getElementById('register-passwordConfirm').value
+            };
+            errorContainer = document.getElementById('register-error-container');
+        } else if (type === 'confirm') {
+            body = {
+                codeConfirm: document.getElementById('confirm-code').value, generatedCode: document.getElementById('confirm-generated-code').value,
+                login: document.getElementById('confirm-login').value, email: document.getElementById('confirm-email').value, password: document.getElementById('confirm-password').value
+            };
+            errorContainer = document.getElementById('confirm-error-container');
+        }
+        if (errorContainer) errorContainer.innerHTML = '';
+
+        sendRequest('POST', url, body)
+            .then(data => {
+                if (type === 'register') {
+                    closeAllModals();
+                    setTimeout(() => { modalOverlay.classList.add('active'); confirmModal.classList.add('active'); }, 50);
+                    document.getElementById('confirm-login').value = data.login; document.getElementById('confirm-email').value = data.email;
+                    document.getElementById('confirm-password').value = data.password; document.getElementById('confirm-generated-code').value = data.generatedCode;
+                } else {
+                    location.reload();
+                }
+            })
+            .catch(err => {
+                let formSelector = '#login-modal .auth-form';
+                if (type === 'register') formSelector = '#register-modal .auth-form';
+                if (type === 'confirm') formSelector = '#confirm-email-modal .auth-form';
+                displayErrors(err, errorContainer, document.querySelector(formSelector));
+            });
+    }
+
+    // 5. КАРУСЕЛЬ
     const carouselWrapper = document.querySelector('.services-wrapper');
     if (carouselWrapper) {
-        // Ждем полной загрузки страницы (включая картинки), чтобы правильно посчитать ширину
         window.addEventListener('load', () => {
-            startInfiniteCarousel(carouselWrapper);
-        });
-    }
-
-    function startInfiniteCarousel(wrapper) {
-        // 1. Запоминаем реальную ширину контента ДО клонирования
-        const originalContentWidth = wrapper.scrollWidth;
-
-        // Если контента меньше, чем ширина экрана, крутить не нужно
-        if (originalContentWidth <= wrapper.clientWidth) return;
-
-        // 2. Клонируем карточки для эффекта бесконечности
-        const originalCards = Array.from(wrapper.children);
-        originalCards.forEach(card => {
-            const clone = card.cloneNode(true);
-            clone.setAttribute('aria-hidden', 'true'); // Для доступности
-            wrapper.appendChild(clone);
-        });
-
-        // 3. Настройки
-        let scrollPos = 0;
-        const speed = 1; // Скорость (пикселей за такт)
-        const intervalTime = 20; // Частота обновления (мс)
-        let isPaused = false;
-        let animationId;
-
-        // 4. Функция прокрутки
-        function scroll() {
-            if (!isPaused) {
-                scrollPos += speed;
-
-                // Если прокрутили на ширину оригинального набора -> сбрасываем в начало
-                if (scrollPos >= originalContentWidth) {
-                    scrollPos = 0;
-                    wrapper.scrollLeft = 0; // Мгновенный прыжок назад
-                } else {
-                    wrapper.scrollLeft = scrollPos;
+            const originalWidth = carouselWrapper.scrollWidth;
+            if (originalWidth <= carouselWrapper.clientWidth) return;
+            const cards = Array.from(carouselWrapper.children);
+            cards.forEach(c => carouselWrapper.appendChild(c.cloneNode(true)));
+            let scrollPos = 0;
+            let isPaused = false;
+            function scroll() {
+                if (!isPaused) {
+                    scrollPos += 1;
+                    if (scrollPos >= originalWidth) { scrollPos = 0; carouselWrapper.scrollLeft = 0; }
+                    else { carouselWrapper.scrollLeft = scrollPos; }
                 }
             }
-        }
-
-        // 5. Запуск
-        animationId = setInterval(scroll, intervalTime);
-
-        // 6. Пауза при наведении
-        wrapper.addEventListener('mouseenter', () => {
-            isPaused = true;
-        });
-
-        wrapper.addEventListener('mouseleave', () => {
-            isPaused = false;
-            // Синхронизируем позицию (на случай, если пользователь покрутил колесиком)
-            scrollPos = wrapper.scrollLeft;
-        });
-
-        // Поддержка тач-устройств
-        wrapper.addEventListener('touchstart', () => { isPaused = true; });
-        wrapper.addEventListener('touchend', () => {
-            isPaused = false;
-            scrollPos = wrapper.scrollLeft;
+            setInterval(scroll, 20);
+            carouselWrapper.addEventListener('mouseenter', () => isPaused = true);
+            carouselWrapper.addEventListener('mouseleave', () => { isPaused = false; scrollPos = carouselWrapper.scrollLeft; });
         });
     }
-    // --- ФИЛЬТРЫ (ОБНОВЛЕНИЕ ЦИФР) ---
-    const priceMin = document.getElementById('price-min');
-    const priceMax = document.getElementById('price-max');
-    const priceMinVal = document.getElementById('price-min-val');
-    const priceMaxVal = document.getElementById('price-max-val');
 
-    if (priceMin && priceMax) {
-        priceMin.addEventListener('input', () => {
-            priceMinVal.textContent = priceMin.value;
-        });
-        priceMax.addEventListener('input', () => {
-            priceMaxVal.textContent = priceMax.value;
-        });
-    }
-    // =========================================
-    //   6. ФИЛЬТРАЦИЯ КУРСОВ (ГЛАВА 22-23)
-    // =========================================
-
+    // 6. ФИЛЬТРАЦИЯ И ПОИСК (ГЛАВА 25)
     const applyFiltersBtn = document.getElementById('apply-filters');
     const sortOrderSelect = document.getElementById('sort-order');
+    const searchInput = document.getElementById('search-input'); // Поле поиска
 
-    // Функция сбора данных и отправки запроса
+    const priceMin = document.getElementById('price-min');
+    const priceMax = document.getElementById('price-max');
+    if (priceMin && priceMax) {
+        priceMin.addEventListener('input', () => { document.getElementById('price-min-val').textContent = priceMin.value; });
+        priceMax.addEventListener('input', () => { document.getElementById('price-max-val').textContent = priceMax.value; });
+    }
+
     function filterCourses() {
-        // 1. Собираем данные с ползунков цены
         const minPrice = document.getElementById('price-min').value;
         const maxPrice = document.getElementById('price-max').value;
-
-        // 2. Собираем отмеченные чекбоксы (Уровни)
         const selectedLevels = [];
-        document.querySelectorAll('.checkbox-container input[type="checkbox"]:checked').forEach(cb => {
-            selectedLevels.push(cb.value);
-        });
-
-        // 3. Берем сортировку
+        document.querySelectorAll('.checkbox-container input[type="checkbox"]:checked').forEach(cb => selectedLevels.push(cb.value));
         const sortType = sortOrderSelect ? sortOrderSelect.value : 'default';
 
-        // 4. Получаем ID категории из URL (он там есть: ?categoryId=...)
+        // НОВОЕ: Получаем значение из поиска
+        const searchQuery = searchInput ? searchInput.value : '';
+
         const urlParams = new URLSearchParams(window.location.search);
         const categoryId = urlParams.get('categoryId');
+        if (!categoryId) return;
 
-        if (!categoryId) return; // Если мы не на странице списка, выходим
-
-        // 5. Формируем объект фильтра
         const filterData = {
             CategoryId: categoryId,
             MinPrice: parseFloat(minPrice),
             MaxPrice: parseFloat(maxPrice),
             Levels: selectedLevels,
-            SortType: sortType
+            SortType: sortType,
+            SearchQuery: searchQuery // Отправляем на сервер
         };
 
-        // 6. Отправляем на сервер
         const container = document.querySelector('.courses-list-container');
-        if (container) container.style.opacity = '0.5'; // Эффект загрузки
+        if (container) container.style.opacity = '0.5';
 
         sendRequest('POST', '/Home/GetCoursesByFilter', filterData)
             .then(courses => {
@@ -336,27 +214,28 @@
             });
     }
 
-    // Привязываем функцию к кнопке "Применить"
     if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            filterCourses();
-        });
+        applyFiltersBtn.addEventListener('click', (e) => { e.preventDefault(); filterCourses(); });
     }
-
-    // Привязываем функцию к селекту сортировки (чтобы сразу обновлялось)
     if (sortOrderSelect) {
-        sortOrderSelect.addEventListener('change', () => {
-            filterCourses();
+        sortOrderSelect.addEventListener('change', () => filterCourses());
+    }
+
+    // Поиск по Enter
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filterCourses();
+            }
         });
     }
 
-    // Функция отрисовки карточек (Вспомогательная)
+    // Отрисовка курсов
     function renderCourses(courses) {
         const container = document.querySelector('.courses-list-container');
         if (!container) return;
-
-        container.innerHTML = ''; // Очищаем старые
+        container.innerHTML = '';
 
         if (courses.length === 0) {
             container.innerHTML = '<p style="width:100%; text-align:center; grid-column: 1/-1;">Курсы не найдены.</p>';
@@ -364,12 +243,12 @@
         }
 
         courses.forEach(course => {
-            // Создаем HTML карточки вручную (так же, как в ListCourses.cshtml)
+            const imagePath = course.image ? course.image.replace('~', '') : '';
+            const priceFormatted = course.price.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' });
+
             const cardHtml = `
                 <div class="course-item">
-                    <div class="course-img">
-                        <img src="${course.image}" alt="${course.name}" />
-                    </div>
+                    <div class="course-img"><img src="${imagePath}" alt="${course.name}" /></div>
                     <div class="course-details">
                         <h3>${course.name}</h3>
                         <div class="course-meta">
@@ -378,74 +257,48 @@
                         </div>
                         <p class="course-desc">${course.description}</p>
                         <div class="course-footer">
-                            <span class="price">${course.price.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</span>
-                            <button class="button">Подробнее</button>
+                            <span class="price">${priceFormatted}</span>
+                            <a href="/Home/GetCourse/${course.id}" class="button">Подробнее</a>
                         </div>
                     </div>
-                </div>
-            `;
+                </div>`;
             container.insertAdjacentHTML('beforeend', cardHtml);
+        });
+    }
+
+    // GOOGLE LOGIN
+    const googleLoginBtn = document.getElementById('google-login-btn');
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = '/Home/AuthenticationGoogle';
         });
     }
 });
 
-// ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// Helpers
 function sendRequest(method, url, body = null) {
     const headers = { 'Content-Type': 'application/json' };
     return fetch(url, {
-        method: method,
-        body: body ? JSON.stringify(body) : null,
-        headers: headers
+        method: method, body: body ? JSON.stringify(body) : null, headers: headers
     }).then(response => {
         if (!response.ok) {
-            // Сначала пробуем прочитать JSON с ошибкой
-            return response.json()
-                .catch(() => {
-                    // Если JSON не прочитался (сервер вернул просто текст или пустоту)
-                    throw new Error('Ошибка сервера ' + response.status);
-                })
-                .then(errorData => {
-                    // Если JSON прочитался, бросаем его как ошибку, чтобы поймать в основном коде
-                    throw errorData;
-                });
+            return response.json().catch(() => { throw new Error(response.status); }).then(e => { throw e; });
         }
         return response.text().then(text => text ? JSON.parse(text) : {});
     });
 }
-function displayErrors(errors, container, form) {
-    console.log('Отображаю ошибки:', errors); // ЭТО ПОКАЖЕТ ОШИБКУ В КОНСОЛИ (F12)
 
+function displayErrors(errors, container, form) {
     if (!container) return;
     container.innerHTML = '';
-
-    if (form) {
-        const inputs = form.querySelectorAll('input');
-        inputs.forEach(input => input.classList.remove('input-error'));
-    }
-
+    if (form) form.querySelectorAll('input').forEach(i => i.classList.remove('input-error'));
     if (errors.description) {
-        const div = document.createElement('div');
-        div.className = 'error-message'; // Убедитесь, что тут error-message
-        div.textContent = errors.description;
-        container.appendChild(div);
+        const div = document.createElement('div'); div.className = 'error-message'; div.textContent = errors.description; container.appendChild(div);
     }
-
     if (Array.isArray(errors)) {
         errors.forEach(e => {
-            const div = document.createElement('div');
-            div.className = 'error-message'; // И тут error-message
-            div.textContent = e.message || e;
-            container.appendChild(div);
+            const div = document.createElement('div'); div.className = 'error-message'; div.textContent = e.message || e; container.appendChild(div);
         });
     }
-
-}
-// --- GOOGLE LOGIN ---
-const googleLoginBtn = document.getElementById('google-login-btn');
-if (googleLoginBtn) {
-    googleLoginBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        // Просто переходим по ссылке на метод контроллера
-        window.location.href = '/Home/AuthenticationGoogle';
-    });
 }
