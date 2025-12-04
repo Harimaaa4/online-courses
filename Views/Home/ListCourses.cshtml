@@ -6,38 +6,83 @@
 
 <div class="container-section">
     <h2 class="info-section">Доступные курсы</h2>
-    <p class="text" style="text-align: center;">Выберите курс для подробного изучения</p>
 </div>
 
-@if (Model != null && Model.Any())
-{
-    <div class="courses-list-container">
-        @foreach (var course in Model)
+<div class="courses-page-container">
+
+    <aside class="filters-sidebar">
+        <div class="filter-group">
+            <h3>Цена</h3>
+            <div class="range-slider">
+                <label>От: <span id="price-min-val">0</span> ₽</label>
+                <input type="range" id="price-min" min="0" max="10000" step="100" value="0">
+
+                <label>До: <span id="price-max-val">10000</span> ₽</label>
+                <input type="range" id="price-max" min="0" max="10000" step="100" value="10000">
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <h3>Уровень</h3>
+            <label class="checkbox-container">
+                <input type="checkbox" value="Beginner"> Новичок
+                <span class="checkmark"></span>
+            </label>
+            <label class="checkbox-container">
+                <input type="checkbox" value="Middle"> Продвинутый
+                <span class="checkmark"></span>
+            </label>
+            <label class="checkbox-container">
+                <input type="checkbox" value="Senior"> Профи
+                <span class="checkmark"></span>
+            </label>
+        </div>
+
+        <button class="button" id="apply-filters" style="width: 100%; margin-top: 20px;">Применить</button>
+    </aside>
+
+    <div class="courses-content">
+
+        <div class="sorting-bar">
+            <span>Сортировать по:</span>
+            <select id="sort-order">
+                <option value="default">По умолчанию</option>
+                <option value="price_asc">Цене (сначала дешевые)</option>
+                <option value="price_desc">Цене (сначала дорогие)</option>
+                <option value="rating">Рейтингу</option>
+            </select>
+        </div>
+
+        @if (Model != null && Model.Any())
         {
-            <div class="course-item">
-                <div class="course-img">
-                    <img src="@Url.Content(course.Image)" alt="@course.Name" />
-                </div>
-                <div class="course-details">
-                    <h3>@course.Name</h3>
-                    <div class="course-meta">
-                        <span class="level-badge">@course.Level</span>
-                        <span class="rating">⭐ @course.Rating</span>
+            <div class="courses-list-container">
+                @foreach (var course in Model)
+                {
+                    <div class="course-item">
+                        <div class="course-img">
+                            <img src="@Url.Content(course.Image)" alt="@course.Name" />
+                        </div>
+                        <div class="course-details">
+                            <h3>@course.Name</h3>
+                            <div class="course-meta">
+                                <span class="level-badge">@course.Level</span>
+                                <span class="rating">⭐ @course.Rating</span>
+                            </div>
+                            <p class="course-desc">@course.Description</p>
+                            <div class="course-footer">
+                                <span class="price">@course.Price.ToString("C")</span>
+                                <button class="button">Подробнее</button>
+                            </div>
+                        </div>
                     </div>
-                    <p class="course-desc">@course.Description</p>
-                    <div class="course-footer">
-                        <span class="price">@course.Price.ToString("C")</span>
-                        <button class="button">Подробнее</button>
-                    </div>
-                </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div style="text-align: center; margin-top: 50px;">
+                <p style="font-size: 1.2rem; color: var(--text-secondary);">Курсы не найдены.</p>
             </div>
         }
     </div>
-}
-else
-{
-    <p style="text-align: center; font-size: 1.2rem; margin-top: 50px;">В этой категории пока нет курсов.</p>
-    <div style="text-align: center; margin-top: 20px;">
-        <a asp-controller="Home" asp-action="Courses" class="button secondary">Вернуться к категориям</a>
-    </div>
-}
+</div>

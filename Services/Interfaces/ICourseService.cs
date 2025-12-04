@@ -1,4 +1,5 @@
 ﻿using online_courses.Domain;
+using online_courses.Models.Filters;
 using online_courses.Response;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,9 @@ namespace online_courses.Services.Interfaces
 {
     public interface ICourseService
     {
-        // Метод для получения курсов конкретной категории
         Task<BaseResponse<List<Course>>> GetCoursesByCategory(Guid categoryId);
+
+        // Новый метод для фильтрации
+        Task<BaseResponse<List<Course>>> GetCoursesByFilter(CourseFilter filter);
     }
 }

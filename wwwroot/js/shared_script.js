@@ -270,6 +270,20 @@
             scrollPos = wrapper.scrollLeft;
         });
     }
+    // --- ФИЛЬТРЫ (ОБНОВЛЕНИЕ ЦИФР) ---
+    const priceMin = document.getElementById('price-min');
+    const priceMax = document.getElementById('price-max');
+    const priceMinVal = document.getElementById('price-min-val');
+    const priceMaxVal = document.getElementById('price-max-val');
+
+    if (priceMin && priceMax) {
+        priceMin.addEventListener('input', () => {
+            priceMinVal.textContent = priceMin.value;
+        });
+        priceMax.addEventListener('input', () => {
+            priceMaxVal.textContent = priceMax.value;
+        });
+    }
 });
 
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ

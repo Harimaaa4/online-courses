@@ -1132,3 +1132,148 @@ body.dark-mode .contact-map iframe {
     font-weight: 700;
     color: var(--text-primary);
 }
+/* =========================================
+   ГЛАВА 22: ФИЛЬТРЫ И СОРТИРОВКА
+   ========================================= */
+
+.courses-page-container {
+    display: grid;
+    grid-template-columns: 250px 1fr; /* Сайдбар 250px, остальное контенту */
+    gap: 40px;
+    margin-bottom: 60px;
+    align-items: start;
+}
+
+/* Сайдбар с фильтрами */
+.filters-sidebar {
+    background: var(--bg-surface);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-card);
+    position: sticky;
+    top: 100px; /* Чтобы "прилипал" при прокрутке */
+}
+
+.filter-group {
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--border-color-light);
+    padding-bottom: 15px;
+}
+
+    .filter-group:last-child {
+        border-bottom: none;
+    }
+
+    .filter-group h3 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        color: var(--text-primary);
+    }
+
+/* Ползунки */
+.range-slider {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+    .range-slider label {
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .range-slider input[type=range] {
+        width: 100%;
+        cursor: pointer;
+    }
+
+/* Чекбоксы */
+.checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-primary);
+    user-select: none;
+}
+
+    .checkbox-container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color-input);
+    border-radius: 4px;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    background-color: #ccc;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Панель сортировки */
+.sorting-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+    .sorting-bar select {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color-input);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        cursor: pointer;
+    }
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .courses-page-container {
+        grid-template-columns: 1fr; /* Одна колонка */
+    }
+
+    .filters-sidebar {
+        position: relative;
+        top: 0;
+        margin-bottom: 30px;
+    }
+}

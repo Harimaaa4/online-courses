@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using AutoMapper;
+using online_courses.Models.Filters;
 
 namespace online_courses.Controllers
 {
@@ -204,6 +205,21 @@ namespace online_courses.Controllers
                 }
             }
             return RedirectToAction("Index");
+        }
+        // === ФИЛЬТРАЦИЯ КУРСОВ (AJAX) ===
+        [HttpPost]
+        public async Task<IActionResult> GetCoursesByFilter([FromBody] CourseFilter filter)
+        {
+            var response = await _courseService.GetCoursesByFilter(filter);
+
+            if (response.StatusCode == online_courses.Response.StatusCode.OK)
+            {
+                // Возвращаем список курсов (JSON), чтобы JS сам их отрисовал
+                var viewModels = _mapper.Map<List<CourseViewModel>>(response.Data);
+                return Ok(viewModels);
+            }
+
+            return BadRequest(new { description = response.Description });
         }
     }
 }
