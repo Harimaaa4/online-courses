@@ -1,0 +1,43 @@
+﻿@model List<online_courses.Models.CourseViewModel>
+
+@{
+    ViewData["Title"] = "Список курсов";
+}
+
+<div class="container-section">
+    <h2 class="info-section">Доступные курсы</h2>
+    <p class="text" style="text-align: center;">Выберите курс для подробного изучения</p>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="courses-list-container">
+        @foreach (var course in Model)
+        {
+            <div class="course-item">
+                <div class="course-img">
+                    <img src="@Url.Content(course.Image)" alt="@course.Name" />
+                </div>
+                <div class="course-details">
+                    <h3>@course.Name</h3>
+                    <div class="course-meta">
+                        <span class="level-badge">@course.Level</span>
+                        <span class="rating">⭐ @course.Rating</span>
+                    </div>
+                    <p class="course-desc">@course.Description</p>
+                    <div class="course-footer">
+                        <span class="price">@course.Price.ToString("C")</span>
+                        <button class="button">Подробнее</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p style="text-align: center; font-size: 1.2rem; margin-top: 50px;">В этой категории пока нет курсов.</p>
+    <div style="text-align: center; margin-top: 20px;">
+        <a asp-controller="Home" asp-action="Courses" class="button secondary">Вернуться к категориям</a>
+    </div>
+}

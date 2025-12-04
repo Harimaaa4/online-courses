@@ -22,6 +22,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Регистрация Хранилищ (Repositories)
 builder.Services.AddScoped<IBaseStorage<UserDb>, UserStorage>();
 builder.Services.AddScoped<IBaseStorage<CategoryDb>, CategoryStorage>();
 builder.Services.AddScoped<IBaseStorage<CourseDb>, CourseStorage>();
@@ -29,8 +30,12 @@ builder.Services.AddScoped<IBaseStorage<CourseDb>, CourseStorage>();
 // Подключение AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
-// Подключение Сервиса Аккаунта
+// Регистрация Сервисов (Services)
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IInitializer, Initializer>();
+
+builder.Services.AddScoped<ICourseService, CourseService>();
 
 // === АУТЕНТИФИКАЦИЯ (Cookie + Google) ===
 builder.Services.AddAuthentication(options =>
@@ -42,16 +47,24 @@ builder.Services.AddAuthentication(options =>
 {
     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Home/Login");
     options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Home/Index");
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // Разрешить куки без HTTPS
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 })
 .AddGoogle(options =>
 {
-    // Берем ключи из конфигурации (secrets.json или appsettings.json)
     options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 });
 
 var app = builder.Build();
+
+// !!! И ВОТ ЭТОГО БЛОКА НЕ ХВАТАЛО (ОН ЗАПОЛНЯЕТ БАЗУ) !!!
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var initializer = services.GetRequiredService<IInitializer>();
+    await initializer.Initialize();
+}
+// ========================================================
 
 // === ПАЙПЛАЙН ===
 if (app.Environment.IsDevelopment())
@@ -67,8 +80,8 @@ else
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAuthentication(); // Сначала проверяем, кто это
-app.UseAuthorization();  // Потом проверяем, можно ли ему сюда
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

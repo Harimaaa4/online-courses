@@ -1,76 +1,32 @@
-﻿@{
-    ViewData["Title"] = "Курсы";
-    ViewData["ActivePage"] = "Courses";
-    ViewData["ShowHeaderImage"] = "false"; /* убираем большую картинку на этой странице */
+﻿@model List<online_courses.Models.CategoryViewModel>
+
+@{
+    ViewData["Title"] = "Каталог курсов";
 }
 
 <div class="container-section">
-    <h2 class="info-section">Наши курсы</h2>
+    <h2 class="info-section">Категории курсов</h2>
+    <p class="text" style="text-align: center;">Выберите направление обучения</p>
 </div>
 
-<div class="services-section">
-    <div class="services-container">
-        <!-- Стрелка влево -->
-        <div class="arrow left" onclick="scrollServices(-1)">←</div>
-
-        <!-- Контейнер с карточками курсов -->
-        <div class="services-wrapper" id="servicesWrapper">
-            <!-- Курс 1 -->
-            <div class="card">
-                <img src="~/images/course-english.jpg" alt="Английский">
-                <div class="card-content">
-                    <h3>Английский язык</h3>
-                    <p>От A1 до C1. Разговорная практика, грамматика, подготовка к IELTS.</p>
+<div class="categories-grid">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <a href="@Url.Action("ListCourses", "Home", new { categoryId = item.Id })" class="category-card">
+                <div class="category-img-wrapper">
+                    <img src="@Url.Content(item.Image)" alt="@item.Name" />
                 </div>
-            </div>
-
-            <!-- Курс 2 -->
-            <div class="card">
-                <img src="~/images/course-spanish.jpg" alt="Испанский">
-                <div class="card-content">
-                    <h3>Испанский язык</h3>
-                    <p>Для путешествий и работы. Носители из Испании и Латинской Америки.</p>
+                <div class="category-content">
+                    <h3>@item.Name</h3>
+                    <p>Курсов: @item.CourseCount</p>
                 </div>
-            </div>
-
-            <!-- Курс 3 -->
-            <div class="card">
-                <img src="~/images/course-german.jpg" alt="Немецкий">
-                <div class="card-content">
-                    <h3>Немецкий язык</h3>
-                    <p>Goethe-Zertifikat, бизнес-немецкий, подготовка к переезду.</p>
-                </div>
-            </div>
-
-            <!-- Курс 4 -->
-            <div class="card">
-                <img src="~/images/course-french.jpg" alt="Французский">
-                <div class="card-content">
-                    <h3>Французский язык</h3>
-                    <p>DELF/DALF, разговорный клуб, культура Франции.</p>
-                </div>
-            </div>
-
-            <!-- Курс 5 -->
-            <div class="card">
-                <img src="~/images/course-kids.jpg" alt="Для детей">
-                <div class="card-content">
-                    <h3>Курсы для детей 7–14 лет</h3>
-                    <p>Игровая методика, мультфильмы, песни. Английский и испанский.</p>
-                </div>
-            </div>
-
-            <!-- Курс 6 -->
-            <div class="card">
-                <img src="~/images/course-corporate.jpg" alt="Корпоративное">
-                <div class="card-content">
-                    <h3>Корпоративное обучение</h3>
-                    <p>Программы для компаний. Выездные занятия, онлайн, любой язык.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Стрелка вправо -->
-        <div class="arrow right" onclick="scrollServices(1)">→</div>
-    </div>
+            </a>
+        }
+    }
+    else
+    {
+        <p style="text-align:center; width:100%;">Категории пока не добавлены.</p>
+    }
 </div>

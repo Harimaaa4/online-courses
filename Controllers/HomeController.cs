@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google; // Один раз
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using online_courses.Models;
 using online_courses.Services.Interfaces;
-using System; // Для Guid
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using System.Linq;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using AutoMapper;
 
 namespace online_courses.Controllers
 {
@@ -17,16 +19,58 @@ namespace online_courses.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IAccountService _accountService;
+        private readonly ICategoryService _categoryService;
+        private readonly ICourseService _courseService; // <--- НОВОЕ
+        private readonly IMapper _mapper;
 
-        public HomeController(ILogger<HomeController> logger, IAccountService accountService)
+        // Обновленный конструктор с ICourseService
+        public HomeController(ILogger<HomeController> logger,
+                              IAccountService accountService,
+                              ICategoryService categoryService,
+                              ICourseService courseService, // <--- НОВОЕ
+                              IMapper mapper)
         {
             _logger = logger;
             _accountService = accountService;
+            _categoryService = categoryService;
+            _courseService = courseService; // <--- НОВОЕ
+            _mapper = mapper;
         }
 
         public IActionResult Index() => View();
         public IActionResult SiteInformation() => View();
-        public IActionResult Courses() => View();
+
+        // 1. КАТАЛОГ (КАТЕГОРИИ)
+        [HttpGet]
+        public async Task<IActionResult> Courses()
+        {
+            var response = await _categoryService.GetAllCategories();
+            if (response.StatusCode == online_courses.Response.StatusCode.OK)
+            {
+                var viewModels = _mapper.Map<List<CategoryViewModel>>(response.Data);
+                return View(viewModels);
+            }
+            return View(new List<CategoryViewModel>());
+        }
+
+        // 2. СПИСОК КУРСОВ ПО КАТЕГОРИИ (ГЛАВА 21)
+        [HttpGet]
+        public async Task<IActionResult> ListCourses(Guid categoryId)
+        {
+            if (categoryId == Guid.Empty) return RedirectToAction("Courses");
+
+            // Получаем курсы конкретной категории
+            var response = await _courseService.GetCoursesByCategory(categoryId);
+
+            if (response.StatusCode == online_courses.Response.StatusCode.OK)
+            {
+                var viewModels = _mapper.Map<List<CourseViewModel>>(response.Data);
+                return View(viewModels);
+            }
+
+            return RedirectToAction("Courses");
+        }
+
         public IActionResult Privacy() => View();
 
         [HttpGet]
@@ -49,10 +93,7 @@ namespace online_courses.Controllers
             return RedirectToAction("Contact");
         }
 
-        // =============================================
-        // AUTH METHODS
-        // =============================================
-
+        // === AUTH METHODS (ОСТАЮТСЯ ПРЕЖНИМИ) ===
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
@@ -88,9 +129,7 @@ namespace online_courses.Controllers
                 GeneratedCode = model.GeneratedCode,
                 Role = "User"
             };
-
             var response = await _accountService.ConfirmEmail(user, model.CodeConfirm);
-
             if (response.StatusCode == online_courses.Response.StatusCode.OK)
             {
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
@@ -130,10 +169,6 @@ namespace online_courses.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        // =============================================
-        // GOOGLE AUTH
-        // =============================================
-
         public async Task AuthenticationGoogle()
         {
             await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme,
@@ -156,14 +191,10 @@ namespace online_courses.Controllers
                     {
                         Login = name ?? email,
                         Email = email,
-                        Password = Guid.NewGuid().ToString(), // Случайный пароль
+                        Password = Guid.NewGuid().ToString(),
                         Role = "User"
                     };
-
-                    // Здесь вызываем метод IsCreatedAccount.
-                    // Он принимает Domain.User, как и положено.
                     var response = await _accountService.IsCreatedAccount(user);
-
                     if (response.StatusCode == online_courses.Response.StatusCode.OK)
                     {
                         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
