@@ -221,5 +221,19 @@ namespace online_courses.Controllers
 
             return BadRequest(new { description = response.Description });
         }
+        // === СТРАНИЦА КОНКРЕТНОГО КУРСА (ГЛАВА 24) ===
+        [HttpGet]
+        public async Task<IActionResult> GetCourse(Guid id)
+        {
+            var response = await _courseService.GetCourse(id);
+
+            if (response.StatusCode == online_courses.Response.StatusCode.OK)
+            {
+                var viewModel = _mapper.Map<CourseViewModel>(response.Data);
+                return View(viewModel);
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }

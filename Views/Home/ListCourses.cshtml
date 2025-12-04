@@ -71,7 +71,7 @@
                             <p class="course-desc">@course.Description</p>
                             <div class="course-footer">
                                 <span class="price">@course.Price.ToString("C")</span>
-                                <button class="button">Подробнее</button>
+                                <a asp-controller="Home" asp-action="GetCourse" asp-route-id="@course.Id" class="button">Подробнее</a>
                             </div>
                         </div>
                     </div>

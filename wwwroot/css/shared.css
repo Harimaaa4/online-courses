@@ -1277,3 +1277,120 @@ body.dark-mode .contact-map iframe {
         margin-bottom: 30px;
     }
 }
+/* =========================================
+   ГЛАВА 24: СТРАНИЦА КУРСА (DETAILS)
+   ========================================= */
+
+.course-details-container {
+    max-width: 1000px;
+    margin: 40px auto 80px;
+    padding: 0 20px;
+}
+
+/* Верхняя карточка */
+.course-header-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    background: var(--bg-surface);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 40px;
+}
+
+.course-img-large {
+    width: 100%;
+    height: 350px;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+    .course-img-large img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.course-info-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+    .course-info-main h1 {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        line-height: 1.2;
+    }
+
+.course-badges {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.level-badge.large {
+    font-size: 16px;
+    padding: 6px 14px;
+}
+
+.rating.large {
+    font-size: 16px;
+}
+
+.price-large {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent-primary);
+    margin-bottom: 30px;
+}
+
+.big-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    width: 100%;
+}
+
+/* Блок описания */
+.course-description-block {
+    background: var(--bg-surface);
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: var(--shadow-card);
+}
+
+    .course-description-block h2 {
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: var(--text-primary);
+    }
+
+.description-text {
+    font-size: 18px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    white-space: pre-wrap; /* Чтобы сохранялись переносы строк из базы */
+}
+
+.back-link {
+    margin-top: 30px;
+    text-align: center;
+}
+
+/* Адаптация */
+@media (max-width: 768px) {
+    .course-header-card {
+        grid-template-columns: 1fr;
+    }
+
+    .course-img-large {
+        height: 250px;
+    }
+
+    .course-info-main h1 {
+        font-size: 28px;
+    }
+}

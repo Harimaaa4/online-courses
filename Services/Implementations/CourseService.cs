@@ -101,5 +101,35 @@ namespace online_courses.Services.Implementations
                 };
             }
         }
+        public async Task<BaseResponse<Course>> GetCourse(Guid id)
+        {
+            try
+            {
+                var course = await _courseStorage.GetAsync(id);
+
+                if (course == null)
+                {
+                    return new BaseResponse<Course>()
+                    {
+                        Description = "Курс не найден",
+                        StatusCode = StatusCode.UserNotFound
+                    };
+                }
+
+                return new BaseResponse<Course>()
+                {
+                    Data = _mapper.Map<Course>(course),
+                    StatusCode = StatusCode.OK
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<Course>()
+                {
+                    Description = ex.Message,
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
     }
 }

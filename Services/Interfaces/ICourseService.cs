@@ -11,7 +11,9 @@ namespace online_courses.Services.Interfaces
     {
         Task<BaseResponse<List<Course>>> GetCoursesByCategory(Guid categoryId);
 
-        // Новый метод для фильтрации
         Task<BaseResponse<List<Course>>> GetCoursesByFilter(CourseFilter filter);
+
+        // НОВЫЙ МЕТОД: Получить один курс по ID
+        Task<BaseResponse<Course>> GetCourse(Guid id);
     }
 }
