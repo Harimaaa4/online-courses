@@ -284,6 +284,109 @@
             priceMaxVal.textContent = priceMax.value;
         });
     }
+    // =========================================
+    //   6. ФИЛЬТРАЦИЯ КУРСОВ (ГЛАВА 22-23)
+    // =========================================
+
+    const applyFiltersBtn = document.getElementById('apply-filters');
+    const sortOrderSelect = document.getElementById('sort-order');
+
+    // Функция сбора данных и отправки запроса
+    function filterCourses() {
+        // 1. Собираем данные с ползунков цены
+        const minPrice = document.getElementById('price-min').value;
+        const maxPrice = document.getElementById('price-max').value;
+
+        // 2. Собираем отмеченные чекбоксы (Уровни)
+        const selectedLevels = [];
+        document.querySelectorAll('.checkbox-container input[type="checkbox"]:checked').forEach(cb => {
+            selectedLevels.push(cb.value);
+        });
+
+        // 3. Берем сортировку
+        const sortType = sortOrderSelect ? sortOrderSelect.value : 'default';
+
+        // 4. Получаем ID категории из URL (он там есть: ?categoryId=...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryId = urlParams.get('categoryId');
+
+        if (!categoryId) return; // Если мы не на странице списка, выходим
+
+        // 5. Формируем объект фильтра
+        const filterData = {
+            CategoryId: categoryId,
+            MinPrice: parseFloat(minPrice),
+            MaxPrice: parseFloat(maxPrice),
+            Levels: selectedLevels,
+            SortType: sortType
+        };
+
+        // 6. Отправляем на сервер
+        const container = document.querySelector('.courses-list-container');
+        if (container) container.style.opacity = '0.5'; // Эффект загрузки
+
+        sendRequest('POST', '/Home/GetCoursesByFilter', filterData)
+            .then(courses => {
+                renderCourses(courses);
+                if (container) container.style.opacity = '1';
+            })
+            .catch(err => {
+                console.error('Ошибка фильтрации:', err);
+                if (container) container.style.opacity = '1';
+            });
+    }
+
+    // Привязываем функцию к кнопке "Применить"
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            filterCourses();
+        });
+    }
+
+    // Привязываем функцию к селекту сортировки (чтобы сразу обновлялось)
+    if (sortOrderSelect) {
+        sortOrderSelect.addEventListener('change', () => {
+            filterCourses();
+        });
+    }
+
+    // Функция отрисовки карточек (Вспомогательная)
+    function renderCourses(courses) {
+        const container = document.querySelector('.courses-list-container');
+        if (!container) return;
+
+        container.innerHTML = ''; // Очищаем старые
+
+        if (courses.length === 0) {
+            container.innerHTML = '<p style="width:100%; text-align:center; grid-column: 1/-1;">Курсы не найдены.</p>';
+            return;
+        }
+
+        courses.forEach(course => {
+            // Создаем HTML карточки вручную (так же, как в ListCourses.cshtml)
+            const cardHtml = `
+                <div class="course-item">
+                    <div class="course-img">
+                        <img src="${course.image}" alt="${course.name}" />
+                    </div>
+                    <div class="course-details">
+                        <h3>${course.name}</h3>
+                        <div class="course-meta">
+                            <span class="level-badge">${course.level}</span>
+                            <span class="rating">⭐ ${course.rating}</span>
+                        </div>
+                        <p class="course-desc">${course.description}</p>
+                        <div class="course-footer">
+                            <span class="price">${course.price.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</span>
+                            <button class="button">Подробнее</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+        });
+    }
 });
 
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
