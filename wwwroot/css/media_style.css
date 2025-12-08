@@ -14,42 +14,69 @@
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
 
-    /* Сайдбар фильтров убираем наверх или делаем уже */
+    /* Сайдбар фильтров (Глава 25) */
     .courses-page-container {
         gap: 20px;
+        grid-template-columns: 220px 1fr;
     }
 }
 
 /* --- Мобильные устройства (до 768px) --- */
 @media (max-width: 768px) {
 
-    /* 1. ШАПКА И МЕНЮ */
+    /* 1. ШАПКА И НАВИГАЦИЯ */
     .header-content {
         justify-content: space-between;
     }
 
-    .nav-menu {
-        display: none; /* Скрываем обычное меню */
-    }
-
+    /* Скрываем обычное меню и кнопки */
+    .nav-menu,
     .auth-buttons {
-        display: none; /* Скрываем кнопки входа */
+        display: none !important;
     }
 
-    .hamburger {
-        display: flex; /* Показываем гамбургер */
+    /* --- ИСПРАВЛЕНИЕ: БЫЛО .hamburger, СТАЛО .hamburger-menu --- */
+    .hamburger-menu {
+        display: flex !important; /* Показываем гамбургер */
+        flex-direction: column;
+        justify-content: space-between;
+        width: 30px;
+        height: 22px;
+        cursor: pointer;
+        z-index: 2000;
+        background: none;
+        border: none;
+        padding: 0;
     }
 
-    /* Боковое меню (Side Menu) */
-    .side-menu {
-        width: 280px;
-    }
-
-        .side-menu.active {
-            right: 0;
+        .hamburger-menu span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: var(--text-primary);
+            border-radius: 3px;
+            transition: all 0.3s ease;
         }
 
-    /* 2. ТЕКСТЫ И ЗАГОЛОВКИ */
+        /* Анимация крестика при открытии */
+        .hamburger-menu.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger-menu.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger-menu.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -7px);
+        }
+
+    /* 2. БОКОВОЕ МЕНЮ (SIDE MENU) */
+    .side-menu {
+        width: 280px; /* Фиксированная ширина на мобильных */
+    }
+
+    /* 3. ТЕКСТЫ */
     h1 {
         font-size: 28px;
     }
@@ -66,7 +93,7 @@
         font-size: 16px;
     }
 
-    /* 3. КАРУСЕЛЬ (Главная) */
+    /* 4. ГЛАВНАЯ: КАРУСЕЛЬ */
     .services-container {
         padding: 0 10px;
     }
@@ -76,18 +103,8 @@
         height: 35px;
         font-size: 18px;
     }
-    /* Скрываем стрелки на совсем маленьких экранах, там удобнее свайпать */
-    @media (max-width: 480px) {
-        .arrow {
-            display: none;
-        }
 
-        .services-wrapper {
-            overflow-x: scroll;
-        }
-    }
-
-    /* 4. СТРАНИЦА СПИСКА КУРСОВ (Глава 25) */
+    /* 5. СТРАНИЦА СПИСКА (Глава 25) */
     .courses-page-container {
         grid-template-columns: 1fr; /* Одна колонка */
     }
@@ -109,7 +126,7 @@
             width: 100%;
         }
 
-    /* 5. СТРАНИЦА КУРСА (Глава 24) */
+    /* 6. СТРАНИЦА КУРСА (Глава 24) */
     .course-header-card {
         grid-template-columns: 1fr;
         padding: 20px;
@@ -122,14 +139,19 @@
     .course-info-main h1 {
         font-size: 24px;
     }
-
-    .price-large {
-        font-size: 26px;
-    }
 }
 
 /* --- Мелкие телефоны (до 480px) --- */
 @media (max-width: 480px) {
+    /* Скрываем стрелки, оставляем свайп */
+    .arrow {
+        display: none;
+    }
+
+    .services-wrapper {
+        overflow-x: scroll;
+    }
+
     .category-img-wrapper {
         height: 180px;
     }
@@ -141,6 +163,5 @@
 
         .course-footer .button {
             width: 100%;
-            text-align: center;
         }
 }
