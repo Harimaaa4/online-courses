@@ -1,88 +1,146 @@
 ﻿/* =========================================
-   АДАПТИВНЫЕ СТИЛИ (ГЛАВА 9)
-   (Стили для маленьких экранов)
+   АДАПТИВНОСТЬ (MEDIA QUERIES)
    ========================================= */
 
-/* Для планшетов и телефонов (<= 992px) 
-   (Рис. 95, 97)
-*/
-@media (max-width: 992px) {
-
-    /* 1. Скрываем обычное меню и кнопки */
-    .main-nav,
-    .auth-buttons {
-        display: none;
+/* --- Планшеты и меньше (до 1024px) --- */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 20px;
     }
 
-    /* 2. Показываем "гамбургер" */
-    .hamburger-menu {
-        display: flex; /* Показываем иконку */
+    /* Курсы: по 2 в ряд */
+    .categories-grid,
+    .courses-list-container {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
 
-    /* 3. Правило для показа бокового меню (Рис. 100) */
-    .side-menu.active {
-        right: 0; /* Меню выезжает */
+    /* Сайдбар фильтров убираем наверх или делаем уже */
+    .courses-page-container {
+        gap: 20px;
     }
 }
 
-
-/* Для секции "Наши Услуги" (Рис. 103)
-   (<= 768px)
-*/
+/* --- Мобильные устройства (до 768px) --- */
 @media (max-width: 768px) {
 
-    /* Убираем стрелки */
-    .arrow {
-        display: none;
+    /* 1. ШАПКА И МЕНЮ */
+    .header-content {
+        justify-content: space-between;
     }
 
-    /* Заставляем карточки не скроллиться, а вставать друг под друга */
-    .services-wrapper {
-        flex-direction: column;
-        overflow-x: hidden; /* Отключаем прокрутку */
-        align-items: center; /* Центрируем карточки */
+    .nav-menu {
+        display: none; /* Скрываем обычное меню */
     }
 
-    .card {
-        min-width: 90%; /* Карточка занимает почти всю ширину */
-        width: 90%;
-        flex: 1 1 auto;
+    .auth-buttons {
+        display: none; /* Скрываем кнопки входа */
     }
 
-        .card:hover {
-            transform: translateY(-5px); /* Уменьшаем эффект */
+    .hamburger {
+        display: flex; /* Показываем гамбургер */
+    }
+
+    /* Боковое меню (Side Menu) */
+    .side-menu {
+        width: 280px;
+    }
+
+        .side-menu.active {
+            right: 0;
         }
+
+    /* 2. ТЕКСТЫ И ЗАГОЛОВКИ */
+    h1 {
+        font-size: 28px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    .info-section {
+        font-size: 26px;
+    }
+
+    .main-text p {
+        font-size: 16px;
+    }
+
+    /* 3. КАРУСЕЛЬ (Главная) */
+    .services-container {
+        padding: 0 10px;
+    }
+
+    .arrow {
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+    /* Скрываем стрелки на совсем маленьких экранах, там удобнее свайпать */
+    @media (max-width: 480px) {
+        .arrow {
+            display: none;
+        }
+
+        .services-wrapper {
+            overflow-x: scroll;
+        }
+    }
+
+    /* 4. СТРАНИЦА СПИСКА КУРСОВ (Глава 25) */
+    .courses-page-container {
+        grid-template-columns: 1fr; /* Одна колонка */
+    }
+
+    .filters-sidebar {
+        position: relative;
+        top: 0;
+        margin-bottom: 30px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color-light);
+    }
+
+    .sorting-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .sorting-bar select {
+            width: 100%;
+        }
+
+    /* 5. СТРАНИЦА КУРСА (Глава 24) */
+    .course-header-card {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+
+    .course-img-large {
+        height: 200px;
+    }
+
+    .course-info-main h1 {
+        font-size: 24px;
+    }
+
+    .price-large {
+        font-size: 26px;
+    }
 }
 
-
-/* Для страницы контактов 
-   (<= 992px, как в твоем старом коде)
-*/
-@media (max-width: 992px) {
-    .contact-container {
-        grid-template-columns: 1fr;
+/* --- Мелкие телефоны (до 480px) --- */
+@media (max-width: 480px) {
+    .category-img-wrapper {
+        height: 180px;
     }
 
-    .contact-map {
-        height: 400px;
+    .course-footer {
+        flex-direction: column;
+        gap: 10px;
     }
 
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
-/* =========================================
-   АДАПТАЦИЯ ДЛЯ НОВЫХ БЛОКОВ (ШАГ 4)
-   ========================================= */
-
-@media (max-width: 992px) {
-    .features-grid {
-        grid-template-columns: 1fr; /* 1 колонка на планшетах */
-        gap: 40px;
-    }
-
-    .testimonials-grid {
-        grid-template-columns: 1fr; /* 1 колонка на планшетах */
-        gap: 24px;
-    }
+        .course-footer .button {
+            width: 100%;
+            text-align: center;
+        }
 }

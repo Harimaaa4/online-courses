@@ -142,33 +142,58 @@
             });
     }
 
-    // 5. КАРУСЕЛЬ
+    // 5. КАРУСЕЛЬ (ИСПРАВЛЕННАЯ)
     const carouselWrapper = document.querySelector('.services-wrapper');
     if (carouselWrapper) {
         window.addEventListener('load', () => {
-            const originalWidth = carouselWrapper.scrollWidth;
-            if (originalWidth <= carouselWrapper.clientWidth) return;
-            const cards = Array.from(carouselWrapper.children);
-            cards.forEach(c => carouselWrapper.appendChild(c.cloneNode(true)));
-            let scrollPos = 0;
-            let isPaused = false;
-            function scroll() {
-                if (!isPaused) {
-                    scrollPos += 1;
-                    if (scrollPos >= originalWidth) { scrollPos = 0; carouselWrapper.scrollLeft = 0; }
-                    else { carouselWrapper.scrollLeft = scrollPos; }
-                }
-            }
-            setInterval(scroll, 20);
-            carouselWrapper.addEventListener('mouseenter', () => isPaused = true);
-            carouselWrapper.addEventListener('mouseleave', () => { isPaused = false; scrollPos = carouselWrapper.scrollLeft; });
+            startInfiniteCarousel(carouselWrapper);
         });
     }
 
-    // 6. ФИЛЬТРАЦИЯ И ПОИСК (ГЛАВА 25)
+    function startInfiniteCarousel(wrapper) {
+        const originalWidth = wrapper.scrollWidth;
+        // Если контента мало, не крутим
+        if (originalWidth <= wrapper.clientWidth) return;
+
+        // Клонируем элементы
+        const cards = Array.from(wrapper.children);
+        cards.forEach(c => wrapper.appendChild(c.cloneNode(true)));
+
+        const speed = 1;
+        const intervalTime = 20;
+        let isPaused = false;
+
+        function scroll() {
+            if (!isPaused) {
+                // ИСПРАВЛЕНИЕ: Берем реальную позицию, а не переменную scrollPos.
+                // Это позволяет кнопкам (scrollServices) работать без конфликтов.
+                if (wrapper.scrollLeft >= originalWidth) {
+                    wrapper.scrollLeft = 0;
+                } else {
+                    wrapper.scrollLeft += speed;
+                }
+            }
+        }
+
+        setInterval(scroll, intervalTime);
+
+        // Пауза при наведении на саму карусель
+        wrapper.addEventListener('mouseenter', () => isPaused = true);
+        wrapper.addEventListener('mouseleave', () => isPaused = false);
+        wrapper.addEventListener('touchstart', () => isPaused = true);
+        wrapper.addEventListener('touchend', () => isPaused = false);
+
+        // ВАЖНО: Пауза при наведении на СТРЕЛКИ, чтобы скролл не дергался при клике
+        document.querySelectorAll('.arrow').forEach(arrow => {
+            arrow.addEventListener('mouseenter', () => isPaused = true);
+            arrow.addEventListener('mouseleave', () => isPaused = false);
+        });
+    }
+
+    // 6. ФИЛЬТРАЦИЯ И ПОИСК
     const applyFiltersBtn = document.getElementById('apply-filters');
     const sortOrderSelect = document.getElementById('sort-order');
-    const searchInput = document.getElementById('search-input'); // Поле поиска
+    const searchInput = document.getElementById('search-input');
 
     const priceMin = document.getElementById('price-min');
     const priceMax = document.getElementById('price-max');
@@ -183,8 +208,6 @@
         const selectedLevels = [];
         document.querySelectorAll('.checkbox-container input[type="checkbox"]:checked').forEach(cb => selectedLevels.push(cb.value));
         const sortType = sortOrderSelect ? sortOrderSelect.value : 'default';
-
-        // НОВОЕ: Получаем значение из поиска
         const searchQuery = searchInput ? searchInput.value : '';
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -197,7 +220,7 @@
             MaxPrice: parseFloat(maxPrice),
             Levels: selectedLevels,
             SortType: sortType,
-            SearchQuery: searchQuery // Отправляем на сервер
+            SearchQuery: searchQuery
         };
 
         const container = document.querySelector('.courses-list-container');
@@ -221,7 +244,6 @@
         sortOrderSelect.addEventListener('change', () => filterCourses());
     }
 
-    // Поиск по Enter
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -302,3 +324,21 @@ function displayErrors(errors, container, form) {
         });
     }
 }
+
+// =========================================
+//   ФУНКЦИИ ДЛЯ КЛИКОВ В HTML (ВНЕ DOMContentLoaded)
+// =========================================
+
+// Функция для стрелок влево/вправо
+window.scrollServices = function (direction) {
+    const wrapper = document.querySelector('.services-wrapper');
+    if (wrapper) {
+        // Ширина карточки (300) + отступ (30) = 330
+        const scrollAmount = 330;
+
+        wrapper.scrollBy({
+            left: direction * scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+};
