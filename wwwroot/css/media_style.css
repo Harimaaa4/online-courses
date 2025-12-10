@@ -25,19 +25,19 @@
 @media (max-width: 768px) {
 
     /* 1. ШАПКА И НАВИГАЦИЯ */
-    .header-content {
+    .header-inner { /* ИСПРАВЛЕНО: было .header-content */
         justify-content: space-between;
     }
 
     /* Скрываем обычное меню и кнопки */
-    .nav-menu,
+    .main-nav, /* ИСПРАВЛЕНО: было .nav-menu */
     .auth-buttons {
         display: none !important;
     }
 
-    /* --- ИСПРАВЛЕНИЕ: БЫЛО .hamburger, СТАЛО .hamburger-menu --- */
-    .hamburger-menu {
-        display: flex !important; /* Показываем гамбургер */
+    /* Показываем гамбургер */
+    .hamburger-menu { /* ИСПРАВЛЕНО: было .hamburger */
+        display: flex !important;
         flex-direction: column;
         justify-content: space-between;
         width: 30px;

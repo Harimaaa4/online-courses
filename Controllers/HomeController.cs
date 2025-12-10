@@ -115,8 +115,15 @@ namespace online_courses.Controllers
                 }
                 return BadRequest(new { description = response.Description });
             }
-            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-            return BadRequest(new { description = errors });
+           
+            var errorList = ModelState.Keys
+                .Where(k => ModelState[k].Errors.Count > 0)
+                .Select(k => new {
+                    field = k, // Имя поля для JS
+                    message = ModelState[k].Errors.First().ErrorMessage
+                })
+                .ToList();
+            return BadRequest(errorList);
         }
 
         [HttpPost]
@@ -154,8 +161,15 @@ namespace online_courses.Controllers
                 }
                 return BadRequest(new { description = response.Description });
             }
-            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-            return BadRequest(new { description = errors });
+            var errorList = ModelState.Keys
+                .Where(k => ModelState[k].Errors.Count > 0)
+                .Select(k => new {
+                    field = k, // Имя поля для JS
+                    message = ModelState[k].Errors.First().ErrorMessage
+                })
+                .ToList();
+            return BadRequest(errorList);
+
         }
 
         public async Task<IActionResult> Logout()

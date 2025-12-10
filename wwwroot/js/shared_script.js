@@ -299,29 +299,77 @@
 });
 
 // Helpers
+// В файле wwwroot/js/shared_script.js
+
 function sendRequest(method, url, body = null) {
     const headers = { 'Content-Type': 'application/json' };
     return fetch(url, {
-        method: method, body: body ? JSON.stringify(body) : null, headers: headers
+        method: method,
+        body: body ? JSON.stringify(body) : null,
+        headers: headers
     }).then(response => {
         if (!response.ok) {
-            return response.json().catch(() => { throw new Error(response.status); }).then(e => { throw e; });
+            // Пытаемся распарсить как JSON, если не вышло — читаем как текст
+            return response.json()
+                .catch(() => response.text().then(text => {
+                    // Если JSON не распарсился, возвращаем текст или статус код
+                    throw new Error(text || `Ошибка сервера: ${response.status}`);
+                }))
+                .then(errObj => {
+                    // Если распарсился JSON, пробрасываем его дальше как ошибку
+                    throw errObj;
+                });
         }
+        // Успешный ответ
         return response.text().then(text => text ? JSON.parse(text) : {});
     });
 }
 
+// В файле wwwroot/js/shared_script.js
+
 function displayErrors(errors, container, form) {
     if (!container) return;
     container.innerHTML = '';
+
+    // Сброс красной обводки
     if (form) form.querySelectorAll('input').forEach(i => i.classList.remove('input-error'));
+
+    // 1. Если пришел объект с полем description (формат из HomeController)
     if (errors.description) {
-        const div = document.createElement('div'); div.className = 'error-message'; div.textContent = errors.description; container.appendChild(div);
+        const div = document.createElement('div');
+        div.className = 'error-message';
+        div.textContent = errors.description;
+        container.appendChild(div);
     }
-    if (Array.isArray(errors)) {
+    // 2. Если пришел массив ошибок (формат из AccountController)
+    else if (Array.isArray(errors)) {
         errors.forEach(e => {
-            const div = document.createElement('div'); div.className = 'error-message'; div.textContent = e.message || e; container.appendChild(div);
+            const div = document.createElement('div');
+            div.className = 'error-message';
+            div.textContent = e.message || e;
+            container.appendChild(div);
+
+            // Если есть поле Field, подсвечиваем input
+            if (form && e.field) {
+                // Ищем input по name (с учетом регистра или без)
+                const input = form.querySelector(`input[name="${e.field}"]`);
+                if (input) input.classList.add('input-error');
+            }
         });
+    }
+    // 3. Если это стандартная JS ошибка (Error) или объект с message
+    else if (errors.message) {
+        const div = document.createElement('div');
+        div.className = 'error-message';
+        div.textContent = errors.message; // Например: "400" или "Network Error"
+        container.appendChild(div);
+    }
+    // 4. Если это просто строка
+    else if (typeof errors === 'string') {
+        const div = document.createElement('div');
+        div.className = 'error-message';
+        div.textContent = errors;
+        container.appendChild(div);
     }
 }
 
