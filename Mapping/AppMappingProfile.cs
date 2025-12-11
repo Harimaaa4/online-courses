@@ -25,7 +25,9 @@ namespace online_courses
 
             // --- КАТЕГОРИИ ---
             // Связь: Домен <-> База (Category)
-            CreateMap<Category, CategoryDb>().ReverseMap();
+            CreateMap<CategoryDb, Category>()
+                .ForMember(dest => dest.CourseCount, opt => opt.MapFrom(src => src.Courses != null ? src.Courses.Count : 0))
+                .ReverseMap();
             // Связь: Домен <-> Представление (CategoryViewModel)
             CreateMap<Category, CategoryViewModel>().ReverseMap();
 

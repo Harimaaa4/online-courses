@@ -31,7 +31,9 @@ namespace online_courses.Repositories
 
         public async Task<List<CategoryDb>> GetAllAsync()
         {
-            return await _db.Categories.ToListAsync();
+            return await _db.Categories
+                .Include(x => x.Courses)
+                .ToListAsync();
         }
 
         public async Task<CategoryDb> GetAsync(Guid id)

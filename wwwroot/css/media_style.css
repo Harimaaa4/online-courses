@@ -14,7 +14,7 @@
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
 
-    /* Сайдбар фильтров (Глава 25) */
+    /* Сайдбар фильтров */
     .courses-page-container {
         gap: 20px;
         grid-template-columns: 220px 1fr;
@@ -24,20 +24,20 @@
 /* --- Мобильные устройства (до 768px) --- */
 @media (max-width: 768px) {
 
-    /* 1. ШАПКА И НАВИГАЦИЯ */
-    .header-inner { /* ИСПРАВЛЕНО: было .header-content */
+    /* 1. ШАПКА И МЕНЮ */
+    .header-inner {
         justify-content: space-between;
     }
 
     /* Скрываем обычное меню и кнопки */
-    .main-nav, /* ИСПРАВЛЕНО: было .nav-menu */
+    .main-nav,
     .auth-buttons {
         display: none !important;
     }
 
-    /* Показываем гамбургер */
-    .hamburger-menu { /* ИСПРАВЛЕНО: было .hamburger */
-        display: flex !important;
+    /* --- ИСПРАВЛЕНИЕ: Класс должен называться .hamburger-menu --- */
+    .hamburger-menu {
+        display: flex !important; /* Показываем гамбургер */
         flex-direction: column;
         justify-content: space-between;
         width: 30px;
@@ -73,7 +73,7 @@
 
     /* 2. БОКОВОЕ МЕНЮ (SIDE MENU) */
     .side-menu {
-        width: 280px; /* Фиксированная ширина на мобильных */
+        width: 280px;
     }
 
     /* 3. ТЕКСТЫ */
@@ -139,6 +139,10 @@
     .course-info-main h1 {
         font-size: 24px;
     }
+
+    .price-large {
+        font-size: 26px;
+    }
 }
 
 /* --- Мелкие телефоны (до 480px) --- */
@@ -163,5 +167,6 @@
 
         .course-footer .button {
             width: 100%;
+            text-align: center;
         }
 }
