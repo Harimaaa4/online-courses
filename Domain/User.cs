@@ -12,7 +12,6 @@ namespace online_courses.Domain
         public string ImagePath { get; set; }
         public DateTime CreatedDate { get; set; }
 
-        // Новое поле для кода подтверждения
         public string GeneratedCode { get; set; }
     }
 }

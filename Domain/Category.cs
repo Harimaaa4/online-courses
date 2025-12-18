@@ -12,7 +12,6 @@ namespace online_courses.Domain
         public int CourseCount { get; set; }
         public DateTime CreatedDate { get; set; }
 
-        // Сюда будем мапить список курсов
         public List<Course> Courses { get; set; }
     }
 }
