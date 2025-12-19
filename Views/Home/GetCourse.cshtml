@@ -19,7 +19,14 @@
             <p class="price-large">@Model.Price.ToString("C")</p>
 
             <div class="action-buttons">
-                <button class="button big-btn">Записаться на курс</button>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="Cart" asp-action="Add" asp-route-id="@Model.Id" class="button big-btn">В корзину</a>
+                }
+                else
+                {
+                    <button onclick="openModal('loginModal')" class="button big-btn">Войти для покупки</button>
+                }
             </div>
         </div>
     </div>

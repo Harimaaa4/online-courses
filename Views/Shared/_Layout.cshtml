@@ -54,6 +54,16 @@
                             О нас
                         </a>
                     </li>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li>
+                            <a asp-controller="Cart" asp-action="Index"
+                               class="@(ViewData["ActivePage"]?.ToString() == "Cart" ? "active" : "")">
+                                Корзина
+                            </a>
+                        </li>
+                    }
                 </ul>
             </nav>
 
