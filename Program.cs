@@ -26,6 +26,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IBaseStorage<UserDb>, UserStorage>();
 builder.Services.AddScoped<IBaseStorage<CategoryDb>, CategoryStorage>();
 builder.Services.AddScoped<IBaseStorage<CourseDb>, CourseStorage>();
+builder.Services.AddScoped<IBaseStorage<CartDb>, CartStorage>();
 
 // Подключение AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
@@ -36,6 +37,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IInitializer, Initializer>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 // === АУТЕНТИФИКАЦИЯ (Cookie + Google) ===
 builder.Services.AddAuthentication(options =>

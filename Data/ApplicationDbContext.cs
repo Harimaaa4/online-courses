@@ -11,7 +11,9 @@ namespace online_courses.Data
         }
 
         public DbSet<UserDb> Users { get; set; }
-        public DbSet<CategoryDb> Categories { get; set; } // Бывшие Countries
-        public DbSet<CourseDb> Courses { get; set; }       // Бывшие Tours
+        public DbSet<CategoryDb> Categories { get; set; }
+        public DbSet<CourseDb> Courses { get; set; }
+
+        public DbSet<CartDb> Carts { get; set; }
     }
 }

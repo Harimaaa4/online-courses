@@ -39,6 +39,8 @@ namespace online_courses
             // 2. Связь: Домен <-> Представление (CourseViewModel)
             CreateMap<online_courses.Domain.Course, CourseViewModel>();
             CreateMap<online_courses.Domain.Category, CategoryViewModel>();
+            // --- КОРЗИНА ---
+            CreateMap<Entities.CartDb, Domain.Cart>().ReverseMap();
         }
     }
 }
