@@ -37,16 +37,16 @@
                         <hr />
 
                         <div class="mb-3">
-                            <label asp-for="AvatarFile" class="form-label">Загрузить фото</label>
-                            <input asp-for="AvatarFile" type="file" class="form-control" accept="image/*">
+                            <label class="form-label">Загрузить фото</label>
+                            <input type="file" name="avatarFile" class="form-control" accept="image/*">
                             <div class="form-text">Выберите изображение с вашего устройства (JPG, PNG).</div>
                         </div>
 
                         <div class="text-center my-2 text-muted">- ИЛИ -</div>
 
                         <div class="mb-3">
-                            <label asp-for="AvatarUrl" class="form-label">Ссылка на аватарку</label>
-                            <input asp-for="AvatarUrl" class="form-control" placeholder="https://...">
+                            <label class="form-label">Ссылка на аватарку</label>
+                            <input type="text" name="avatarUrl" class="form-control" placeholder="https://..." value="@Model.AvatarUrl">
                         </div>
 
                         <div class="d-grid gap-2 mt-4">

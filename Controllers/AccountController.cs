@@ -61,8 +61,10 @@ namespace online_courses.Controllers
         }
 
         // === БЕЗОПАСНЫЙ МЕТОД ЗАГРУЗКИ ===
+        // === ИСПРАВЛЕННЫЙ МЕТОД ЗАГРУЗКИ ===
+        // === ИСПРАВЛЕННЫЙ МЕТОД (принимаем файл напрямую) ===
         [HttpPost]
-        public async Task<IActionResult> Profile(ProfileViewModel model)
+        public async Task<IActionResult> Profile(IFormFile avatarFile, string avatarUrl)
         {
             try
             {
@@ -74,43 +76,41 @@ namespace online_courses.Controllers
                 {
                     string newAvatarPath = null;
 
-                    // 1. Если файл выбран
-                    if (model.AvatarFile != null)
+                    // 1. Если файл пришел (avatarFile не null)
+                    if (avatarFile != null)
                     {
-                        // Определяем путь к папке wwwroot
-                        // Если WebRootPath пустой, берем текущую папку + wwwroot
+                        // Определяем путь. Если WebRootPath не задан, берем текущую папку + wwwroot
                         string webRootPath = _appEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
-                        string folderPath = Path.Combine(webRootPath, "images", "avatars");
+                        // Путь: wwwroot/images/avatars
+                        string uploadDir = Path.Combine(webRootPath, "images", "avatars");
 
-                        // Создаем папку, если её нет
-                        if (!Directory.Exists(folderPath))
+                        // На всякий случай проверяем папку
+                        if (!Directory.Exists(uploadDir))
                         {
-                            Directory.CreateDirectory(folderPath);
+                            Directory.CreateDirectory(uploadDir);
                         }
 
-                        // Уникальное имя файла
-                        string uniqueName = Guid.NewGuid().ToString() + Path.GetExtension(model.AvatarFile.FileName);
+                        // Генерируем имя файла
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
+                        string filePath = Path.Combine(uploadDir, fileName);
 
-                        // Полный путь для сохранения
-                        string fullPath = Path.Combine(folderPath, uniqueName);
-
-                        // Сохраняем файл
-                        using (var fileStream = new FileStream(fullPath, FileMode.Create))
+                        // Сохраняем
+                        using (var stream = new FileStream(filePath, FileMode.Create))
                         {
-                            await model.AvatarFile.CopyToAsync(fileStream);
+                            await avatarFile.CopyToAsync(stream);
                         }
 
-                        // Путь для базы данных (относительный)
-                        newAvatarPath = "/images/avatars/" + uniqueName;
+                        // Записываем путь для базы
+                        newAvatarPath = "/images/avatars/" + fileName;
                     }
-                    // 2. Если файла нет, проверяем ссылку
-                    else if (!string.IsNullOrEmpty(model.AvatarUrl))
+                    // 2. Если файла нет, берем ссылку
+                    else if (!string.IsNullOrEmpty(avatarUrl))
                     {
-                        newAvatarPath = model.AvatarUrl;
+                        newAvatarPath = avatarUrl;
                     }
 
-                    // Если данные изменились — сохраняем
+                    // Сохраняем в базу, если что-то поменялось
                     if (newAvatarPath != null)
                     {
                         user.ImagePath = newAvatarPath;
@@ -123,8 +123,7 @@ namespace online_courses.Controllers
             }
             catch (Exception ex)
             {
-                // Если всё же упадет — покажет ошибку на экране, а не Connection Failure
-                return Content($"КРИТИЧЕСКАЯ ОШИБКА:\n{ex.Message}\n\nПУТЬ:\n{_appEnvironment?.WebRootPath ?? "NULL"}");
+                return Content($"ОШИБКА: {ex.Message}");
             }
         }
 
