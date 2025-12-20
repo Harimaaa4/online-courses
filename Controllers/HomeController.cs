@@ -21,27 +21,25 @@ namespace online_courses.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IAccountService _accountService;
         private readonly ICategoryService _categoryService;
-        private readonly ICourseService _courseService; // <--- НОВОЕ
+        private readonly ICourseService _courseService;
         private readonly IMapper _mapper;
 
-        // Обновленный конструктор с ICourseService
         public HomeController(ILogger<HomeController> logger,
                               IAccountService accountService,
                               ICategoryService categoryService,
-                              ICourseService courseService, // <--- НОВОЕ
+                              ICourseService courseService,
                               IMapper mapper)
         {
             _logger = logger;
             _accountService = accountService;
             _categoryService = categoryService;
-            _courseService = courseService; // <--- НОВОЕ
+            _courseService = courseService;
             _mapper = mapper;
         }
 
         public IActionResult Index() => View();
         public IActionResult SiteInformation() => View();
 
-        // 1. КАТАЛОГ (КАТЕГОРИИ)
         [HttpGet]
         public async Task<IActionResult> Courses()
         {
@@ -54,13 +52,11 @@ namespace online_courses.Controllers
             return View(new List<CategoryViewModel>());
         }
 
-        // 2. СПИСОК КУРСОВ ПО КАТЕГОРИИ (ГЛАВА 21)
         [HttpGet]
         public async Task<IActionResult> ListCourses(Guid categoryId)
         {
             if (categoryId == Guid.Empty) return RedirectToAction("Courses");
 
-            // Получаем курсы конкретной категории
             var response = await _courseService.GetCoursesByCategory(categoryId);
 
             if (response.StatusCode == online_courses.Response.StatusCode.OK)
@@ -94,7 +90,7 @@ namespace online_courses.Controllers
             return RedirectToAction("Contact");
         }
 
-        // === AUTH METHODS (ОСТАЮТСЯ ПРЕЖНИМИ) ===
+        // === AUTH METHODS ===
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
@@ -115,11 +111,11 @@ namespace online_courses.Controllers
                 }
                 return BadRequest(new { description = response.Description });
             }
-           
+
             var errorList = ModelState.Keys
                 .Where(k => ModelState[k].Errors.Count > 0)
                 .Select(k => new {
-                    field = k, // Имя поля для JS
+                    field = k,
                     message = ModelState[k].Errors.First().ErrorMessage
                 })
                 .ToList();
@@ -164,12 +160,11 @@ namespace online_courses.Controllers
             var errorList = ModelState.Keys
                 .Where(k => ModelState[k].Errors.Count > 0)
                 .Select(k => new {
-                    field = k, // Имя поля для JS
+                    field = k,
                     message = ModelState[k].Errors.First().ErrorMessage
                 })
                 .ToList();
             return BadRequest(errorList);
-
         }
 
         public async Task<IActionResult> Logout()
@@ -190,6 +185,7 @@ namespace online_courses.Controllers
                 new AuthenticationProperties { RedirectUri = Url.Action("GoogleResponse") });
         }
 
+        // === ИСПРАВЛЕННЫЙ МЕТОД GOOGLE RESPONSE ===
         public async Task<IActionResult> GoogleResponse()
         {
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -200,6 +196,9 @@ namespace online_courses.Controllers
                 var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
                 var name = result.Principal.FindFirst(ClaimTypes.Name)?.Value;
 
+                // 1. ИЗВЛЕКАЕМ КАРТИНКУ ИЗ GOOGLE
+                var googlePicture = result.Principal.FindFirst("urn:google:picture")?.Value;
+
                 if (email != null)
                 {
                     var user = new online_courses.Domain.User
@@ -207,20 +206,44 @@ namespace online_courses.Controllers
                         Login = name ?? email,
                         Email = email,
                         Password = Guid.NewGuid().ToString(),
-                        Role = "User"
+                        Role = "User",
+                        // 2. СОХРАНЯЕМ ЕЁ В ОБЪЕКТЕ ПОЛЬЗОВАТЕЛЯ (для записи в БД)
+                        ImagePath = googlePicture
                     };
+
                     var response = await _accountService.IsCreatedAccount(user);
                     if (response.StatusCode == online_courses.Response.StatusCode.OK)
                     {
+                        // 3. ДОБАВЛЯЕМ КАРТИНКУ В COOKIE ПРИ ВХОДЕ
+
+                        // === ИСПРАВЛЕНИЕ: Убрали .Identity, так как Data это уже ClaimsIdentity ===
+                        var claimsIdentity = response.Data;
+                        // =========================================================================
+
+                        if (!string.IsNullOrEmpty(googlePicture))
+                        {
+                            if (!claimsIdentity.HasClaim(c => c.Type == "urn:google:picture"))
+                            {
+                                claimsIdentity.AddClaim(new Claim("urn:google:picture", googlePicture));
+                            }
+                            // Также добавим как AvatarUrl для совместимости с нашей логикой
+                            if (!claimsIdentity.HasClaim(c => c.Type == "AvatarUrl"))
+                            {
+                                claimsIdentity.AddClaim(new Claim("AvatarUrl", googlePicture));
+                            }
+                        }
+
                         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                             new ClaimsPrincipal(response.Data));
+
                         return RedirectToAction("Index");
                     }
                 }
             }
             return RedirectToAction("Index");
         }
-        // === ФИЛЬТРАЦИЯ КУРСОВ (AJAX) ===
+        // ==========================================
+
         [HttpPost]
         public async Task<IActionResult> GetCoursesByFilter([FromBody] CourseFilter filter)
         {
@@ -228,14 +251,13 @@ namespace online_courses.Controllers
 
             if (response.StatusCode == online_courses.Response.StatusCode.OK)
             {
-                // Возвращаем список курсов (JSON), чтобы JS сам их отрисовал
                 var viewModels = _mapper.Map<List<CourseViewModel>>(response.Data);
                 return Ok(viewModels);
             }
 
             return BadRequest(new { description = response.Description });
         }
-        // === СТРАНИЦА КОНКРЕТНОГО КУРСА (ГЛАВА 24) ===
+
         [HttpGet]
         public async Task<IActionResult> GetCourse(Guid id)
         {

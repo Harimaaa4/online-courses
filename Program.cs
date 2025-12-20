@@ -56,6 +56,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    options.Scope.Add("profile");
     options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
 });
 

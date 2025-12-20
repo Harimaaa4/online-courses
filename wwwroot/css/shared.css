@@ -1394,3 +1394,118 @@ body.dark-mode .contact-map iframe {
         font-size: 28px;
     }
 }
+/* === СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ПРОФИЛЯ === */
+
+/* === СТИЛИ ДЛЯ ВЫПАДАЮЩЕГО МЕНЮ ПРОФИЛЯ === */
+
+/* Аватарка в кнопке */
+.user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.user-dropdown-btn:hover .user-avatar {
+    transform: scale(1.05);
+}
+
+/* --- Основной контейнер меню (ЭТОГО БЛОКА НЕ ХВАТАЛО) --- */
+.custom-dropdown-menu {
+    border: none;
+    border-radius: 12px; /* Мягкие углы */
+    padding: 10px;
+    margin-top: 15px !important; /* Отступ от шапки */
+    min-width: 220px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    animation: fadeInUp 0.2s ease-out;
+}
+
+    /* Стрелочка-уголок сверху (через псевдо-элемент) */
+    .custom-dropdown-menu::before {
+        content: "";
+        position: absolute;
+        top: -8px; /* Поднимаем стрелочку над меню */
+        right: 20px; /* Сдвигаем вправо, под кнопку */
+        width: 16px;
+        height: 16px;
+        background-color: #fff;
+        transform: rotate(45deg); /* Ромб */
+        border-top: 1px solid rgba(0,0,0,0.1);
+        border-left: 1px solid rgba(0,0,0,0.1);
+        z-index: 0;
+    }
+
+    /* Чтобы пункты были поверх стрелочки */
+    .custom-dropdown-menu li {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Пункты меню */
+    .custom-dropdown-menu .dropdown-item {
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #4a4a4a;
+        transition: all 0.2s;
+    }
+
+        .custom-dropdown-menu .dropdown-item:hover {
+            background-color: #f0f2f5;
+            transform: translateX(5px);
+        }
+
+    /* Разделитель */
+    .custom-dropdown-menu .dropdown-divider {
+        margin: 8px 0;
+        border-top: 1px solid #eee;
+    }
+
+/* Анимация появления */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* === ПОДДЕРЖКА ТЁМНОЙ ТЕМЫ === */
+body.dark-mode .custom-dropdown-menu {
+    background-color: #2d2d2d;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+    body.dark-mode .custom-dropdown-menu::before {
+        background-color: #2d2d2d;
+        border-color: #444;
+    }
+
+    body.dark-mode .custom-dropdown-menu .dropdown-item {
+        color: #e0e0e0;
+    }
+
+        body.dark-mode .custom-dropdown-menu .dropdown-item:hover {
+            background-color: #3d3d3d;
+        }
+
+    body.dark-mode .custom-dropdown-menu .dropdown-divider {
+        border-top: 1px solid #444;
+    }
+
+body.dark-mode .user-dropdown-btn {
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .user-avatar {
+    border-color: #444;
+}

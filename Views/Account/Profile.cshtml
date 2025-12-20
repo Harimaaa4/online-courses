@@ -23,7 +23,8 @@
                         }
                     </div>
 
-                    <form asp-action="Profile" method="post">
+                    <form asp-action="Profile" method="post" enctype="multipart/form-data">
+
                         <div class="mb-3">
                             <label class="form-label">Логин</label>
                             <input type="text" class="form-control" value="@Model.Login" disabled readonly>
@@ -33,13 +34,22 @@
                             <input type="text" class="form-control" value="@Model.Email" disabled readonly>
                         </div>
 
+                        <hr />
+
                         <div class="mb-3">
-                            <label asp-for="AvatarUrl" class="form-label">Ссылка на аватарку</label>
-                            <input asp-for="AvatarUrl" class="form-control" placeholder="Вставьте ссылку на изображение">
-                            <div class="form-text">Вы можете вставить прямую ссылку на любую картинку в интернете.</div>
+                            <label asp-for="AvatarFile" class="form-label">Загрузить фото</label>
+                            <input asp-for="AvatarFile" type="file" class="form-control" accept="image/*">
+                            <div class="form-text">Выберите изображение с вашего устройства (JPG, PNG).</div>
                         </div>
 
-                        <div class="d-grid gap-2">
+                        <div class="text-center my-2 text-muted">- ИЛИ -</div>
+
+                        <div class="mb-3">
+                            <label asp-for="AvatarUrl" class="form-label">Ссылка на аватарку</label>
+                            <input asp-for="AvatarUrl" class="form-control" placeholder="https://...">
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn btn-success">Сохранить изменения</button>
                             <a asp-controller="Home" asp-action="Logout" class="btn btn-outline-danger">Выйти из аккаунта</a>
                         </div>
