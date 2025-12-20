@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Hosting; // <--- НУЖНО ДЛЯ РАБОТЫ С ФАЙЛАМИ
+using Microsoft.AspNetCore.Hosting; // Для работы с путями
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using online_courses.Entities;
@@ -8,7 +8,7 @@ using online_courses.Interfaces;
 using online_courses.Models;
 using System;
 using System.Collections.Generic;
-using System.IO; // <--- НУЖНО ДЛЯ ПОТОКОВ
+using System.IO; // Для работы с файлами
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -18,20 +18,20 @@ namespace online_courses.Controllers
     public class AccountController : Controller
     {
         private readonly IBaseStorage<UserDb> _userStorage;
-        private readonly IWebHostEnvironment _appEnvironment; // <--- СЕРВИС ОКРУЖЕНИЯ
+        private readonly IWebHostEnvironment _appEnvironment;
 
-        // Добавляем IWebHostEnvironment в конструктор
-        public AccountController(IBaseStorage<UserDb> userStorage)
+        // Конструктор
+        public AccountController(IBaseStorage<UserDb> userStorage, IWebHostEnvironment appEnvironment)
         {
             _userStorage = userStorage;
-            _appEnvironment = null;
+            _appEnvironment = appEnvironment;
         }
 
         [HttpPost]
         public IActionResult Login([FromBody] LoginViewModel model)
         {
             if (ModelState.IsValid) return Ok(model);
-            return BadRequest(ModelState); // Упростил для краткости
+            return BadRequest(ModelState);
         }
 
         [HttpPost]
@@ -60,7 +60,7 @@ namespace online_courses.Controllers
             return View(model);
         }
 
-        // === ОБНОВЛЕННЫЙ МЕТОД СОХРАНЕНИЯ ПРОФИЛЯ ===
+        // === БЕЗОПАСНЫЙ МЕТОД ЗАГРУЗКИ ===
         [HttpPost]
         public async Task<IActionResult> Profile(ProfileViewModel model)
         {
@@ -74,30 +74,26 @@ namespace online_courses.Controllers
                 {
                     string newAvatarPath = null;
 
-                    // 1. Если загружен файл
+                    // 1. Если файл выбран
                     if (model.AvatarFile != null)
                     {
-                        // Проверка: есть ли папка wwwroot
-                        if (string.IsNullOrEmpty(_appEnvironment.WebRootPath))
-                        {
-                            return Content("ОШИБКА: WebRootPath is null. Убедитесь, что папка wwwroot существует в проекте.");
-                        }
+                        // Определяем путь к папке wwwroot
+                        // Если WebRootPath пустой, берем текущую папку + wwwroot
+                        string webRootPath = _appEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
-                        // Генерируем уникальное имя файла
-                        string uniqueName = Guid.NewGuid().ToString() + "_" + model.AvatarFile.FileName;
-
-                        // Путь относительно сайта
-                        string relativePath = "/images/avatars/" + uniqueName;
-
-                        // Полный путь на диске (Используем Path.Combine для надежности)
-                        string fullPath = Path.Combine(_appEnvironment.WebRootPath, "images", "avatars", uniqueName);
+                        string folderPath = Path.Combine(webRootPath, "images", "avatars");
 
                         // Создаем папку, если её нет
-                        string dirInfo = Path.GetDirectoryName(fullPath);
-                        if (!Directory.Exists(dirInfo))
+                        if (!Directory.Exists(folderPath))
                         {
-                            Directory.CreateDirectory(dirInfo);
+                            Directory.CreateDirectory(folderPath);
                         }
+
+                        // Уникальное имя файла
+                        string uniqueName = Guid.NewGuid().ToString() + Path.GetExtension(model.AvatarFile.FileName);
+
+                        // Полный путь для сохранения
+                        string fullPath = Path.Combine(folderPath, uniqueName);
 
                         // Сохраняем файл
                         using (var fileStream = new FileStream(fullPath, FileMode.Create))
@@ -105,15 +101,16 @@ namespace online_courses.Controllers
                             await model.AvatarFile.CopyToAsync(fileStream);
                         }
 
-                        newAvatarPath = relativePath;
+                        // Путь для базы данных (относительный)
+                        newAvatarPath = "/images/avatars/" + uniqueName;
                     }
-                    // 2. Если файла нет, берем ссылку
+                    // 2. Если файла нет, проверяем ссылку
                     else if (!string.IsNullOrEmpty(model.AvatarUrl))
                     {
                         newAvatarPath = model.AvatarUrl;
                     }
 
-                    // Обновляем данные
+                    // Если данные изменились — сохраняем
                     if (newAvatarPath != null)
                     {
                         user.ImagePath = newAvatarPath;
@@ -126,8 +123,8 @@ namespace online_courses.Controllers
             }
             catch (Exception ex)
             {
-                // === ВРЕМЕННЫЙ ВЫВОД ОШИБКИ НА ЭКРАН ===
-                return Content($"ПРОИЗОШЛА ОШИБКА:\n{ex.Message}\n\nСТЕК:\n{ex.StackTrace}");
+                // Если всё же упадет — покажет ошибку на экране, а не Connection Failure
+                return Content($"КРИТИЧЕСКАЯ ОШИБКА:\n{ex.Message}\n\nПУТЬ:\n{_appEnvironment?.WebRootPath ?? "NULL"}");
             }
         }
 
@@ -147,8 +144,6 @@ namespace online_courses.Controllers
             };
 
             if (!string.IsNullOrEmpty(user.Email)) claims.Add(new Claim(ClaimTypes.Email, user.Email));
-
-            // Здесь теперь может лежать как URL (http...), так и путь к файлу (/images/...)
             if (!string.IsNullOrEmpty(user.ImagePath)) claims.Add(new Claim("AvatarUrl", user.ImagePath));
 
             var oldGooglePic = User.FindFirst("urn:google:picture");
