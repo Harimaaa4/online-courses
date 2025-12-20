@@ -4,6 +4,7 @@ using online_courses.Models;
 using online_courses.Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics; // Нужно для Activity
 using System.Threading.Tasks;
 
 namespace online_courses.Controllers
@@ -13,7 +14,6 @@ namespace online_courses.Controllers
         private readonly ICartService _cartService;
         private readonly IMapper _mapper;
 
-        // Внедряем IMapper через конструктор
         public CartController(ICartService cartService, IMapper mapper)
         {
             _cartService = cartService;
@@ -23,21 +23,16 @@ namespace online_courses.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // 1. Получаем данные из сервиса (Logic/Domain)
             var response = await _cartService.GetUserItems(User.Identity.Name);
 
-            // 2. Проверяем статус
             if (response.StatusCode == online_courses.Response.StatusCode.OK)
             {
-                // 3. Маппим: AutoMapper сам преобразует список Domain.Cart в список CartViewModel,
-                // используя правила, которые мы описали в AppMappingProfile.
                 var viewModel = _mapper.Map<List<CartViewModel>>(response.Data);
-
                 return View(viewModel);
             }
 
-            // Если произошла ошибка
-            return View("Error");
+            // ИСПРАВЛЕНИЕ: Передаем модель ошибки, чтобы View не падал
+            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         [HttpGet]
@@ -50,7 +45,7 @@ namespace online_courses.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Если не вышло добавить (например, курс уже в корзине), возвращаем пользователя к списку курсов
+            // Если ошибка, возвращаемся к списку курсов
             return RedirectToAction("Courses", "Home");
         }
 

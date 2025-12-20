@@ -110,6 +110,15 @@ namespace online_courses.Services.Implementations
                 var allCarts = await _cartStorage.GetAllAsync();
                 // Фильтруем корзину только для текущего пользователя
                 var userCarts = allCarts.Where(x => x.UserId == user.Id).ToList();
+                // Проверяем, загрузились ли данные о курсе. Если нет - подгружаем вручную.
+                // Это нужно, так как generic-репозиторий часто не делает Include.
+                foreach (var item in userCarts)
+                {
+                    if (item.Course == null)
+                    {
+                        item.Course = await _courseStorage.GetAsync(item.CourseId);
+                    }
+                }
 
                 var data = _mapper.Map<List<Domain.Cart>>(userCarts);
 
@@ -117,6 +126,7 @@ namespace online_courses.Services.Implementations
             }
             catch (Exception ex)
             {
+                // Теперь мы будем знать, что пошло не так, если ошибка повторится
                 return new BaseResponse<List<Domain.Cart>>() { Description = ex.Message, StatusCode = StatusCode.InternalServerError };
             }
         }

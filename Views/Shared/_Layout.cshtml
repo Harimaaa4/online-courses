@@ -75,9 +75,17 @@
 
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <div class="user-menu" style="display: flex; align-items: center; gap: 15px;">
-                        <span style="font-weight: 600;">@User.Identity.Name</span>
-                        <a asp-controller="Home" asp-action="Logout" class="button">Выйти</a>
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit;">
+                            <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                            <span style="font-weight: 600; margin-left: 8px;">@User.Identity.Name</span>
+                        </a>
+                        <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser1">
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Профиль</a></li>
+                            <li><a class="dropdown-item" asp-controller="Cart" asp-action="Index">Корзина</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" asp-controller="Home" asp-action="Logout">Выйти</a></li>
+                        </ul>
                     </div>
                 }
                 else
