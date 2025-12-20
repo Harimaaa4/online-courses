@@ -36,7 +36,7 @@ namespace online_courses.Services.Implementations
             {
                 // 1. Ищем пользователя
                 var users = await _userStorage.GetAllAsync();
-                var user = users.FirstOrDefault(x => x.Login == userLogin);
+                var user = users.FirstOrDefault(x => x.Login == userLogin || x.Email == userLogin);
                 if (user == null)
                 {
                     return new BaseResponse<Cart>() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };
@@ -101,7 +101,7 @@ namespace online_courses.Services.Implementations
             try
             {
                 var users = await _userStorage.GetAllAsync();
-                var user = users.FirstOrDefault(x => x.Login == userLogin);
+                var user = users.FirstOrDefault(x => x.Login == userLogin || x.Email == userLogin);
                 if (user == null)
                 {
                     return new BaseResponse<List<Domain.Cart>>() { Description = "Пользователь не найден", StatusCode = StatusCode.UserNotFound };

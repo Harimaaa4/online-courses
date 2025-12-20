@@ -76,12 +76,25 @@
                 @if (User.Identity.IsAuthenticated)
                 {
                     <div class="dropdown">
-                        <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false" style="color: inherit;">
-                            <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
-                            <span style="font-weight: 600; margin-left: 8px;">@User.Identity.Name</span>
-                        </a>
-                        <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser1">
-                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Профиль</a></li>
+                        <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center p-0"
+                                type="button"
+                                id="dropdownUserMenu"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+
+                            @if (!string.IsNullOrEmpty(User.FindFirst("urn:google:picture")?.Value))
+                            {
+                                <img src="@User.FindFirst("urn:google:picture")?.Value" alt="Avatar" width="32" height="32" class="rounded-circle">
+                            }
+                            else
+                            {
+                                <img src="~/images/академическая шапочка.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                            }
+
+                            <span class="ms-2 fw-bold">@User.Identity.Name</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownUserMenu">
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Редактировать профиль</a></li>
                             <li><a class="dropdown-item" asp-controller="Cart" asp-action="Index">Корзина</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" asp-controller="Home" asp-action="Logout">Выйти</a></li>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -55,18 +56,17 @@ builder.Services.AddAuthentication(options =>
 {
     options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    options.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
 });
 
 var app = builder.Build();
 
-// !!! х бнр щрнцн акнйю ме убюрюкн (нм гюонкмъер аюгс) !!!
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var initializer = services.GetRequiredService<IInitializer>();
     await initializer.Initialize();
 }
-// ========================================================
 
 // === оюиокюим ===
 if (app.Environment.IsDevelopment())

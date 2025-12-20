@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics; // Нужно для Activity
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace online_courses.Controllers
 {
@@ -23,7 +24,10 @@ namespace online_courses.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var response = await _cartService.GetUserItems(User.Identity.Name);
+            // Пытаемся получить Email. Если его нет, берем Name.
+            var userName = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity.Name;
+
+            var response = await _cartService.GetUserItems(userName);
 
             if (response.StatusCode == online_courses.Response.StatusCode.OK)
             {
@@ -31,21 +35,23 @@ namespace online_courses.Controllers
                 return View(viewModel);
             }
 
-            // ИСПРАВЛЕНИЕ: Передаем модель ошибки, чтобы View не падал
+            ViewBag.ErrorDescription = response.Description;
             return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
         [HttpGet]
         public async Task<IActionResult> Add(Guid id)
         {
-            var response = await _cartService.AddToCart(User.Identity.Name, id);
+            // То же самое здесь
+            var userName = User.FindFirst(ClaimTypes.Email)?.Value ?? User.Identity.Name;
+
+            var response = await _cartService.AddToCart(userName, id);
 
             if (response.StatusCode == online_courses.Response.StatusCode.OK)
             {
                 return RedirectToAction("Index");
             }
 
-            // Если ошибка, возвращаемся к списку курсов
             return RedirectToAction("Courses", "Home");
         }
 

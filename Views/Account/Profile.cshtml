@@ -1,0 +1,51 @@
+﻿@model online_courses.Models.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Профиль";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Редактирование профиля</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                        {
+                            <img src="@Model.AvatarUrl" alt="Avatar" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <img src="https://github.com/mdo.png" alt="Avatar" class="rounded-circle img-thumbnail" style="width: 150px; height: 150px;">
+                        }
+                    </div>
+
+                    <form asp-action="Profile" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Логин</label>
+                            <input type="text" class="form-control" value="@Model.Login" disabled readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="text" class="form-control" value="@Model.Email" disabled readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AvatarUrl" class="form-label">Ссылка на аватарку</label>
+                            <input asp-for="AvatarUrl" class="form-control" placeholder="Вставьте ссылку на изображение">
+                            <div class="form-text">Вы можете вставить прямую ссылку на любую картинку в интернете.</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Сохранить изменения</button>
+                            <a asp-controller="Home" asp-action="Logout" class="btn btn-outline-danger">Выйти из аккаунта</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
