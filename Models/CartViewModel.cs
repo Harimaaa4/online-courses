@@ -12,6 +12,6 @@ namespace online_courses.Models
 
         public decimal Price { get; set; }
 
-        public string Image { get; set; }
+        public string ImagePath { get; set; }
     }
 }

@@ -19,46 +19,52 @@ namespace online_courses.Mapping
 
             CreateMap<LoginViewModel, User>();
 
-            // Связь: Домен <-> База (User)
             CreateMap<User, UserDb>().ReverseMap();
-
             CreateMap<RegisterViewModel, ConfirmEmailViewModel>().ReverseMap();
             CreateMap<User, ConfirmEmailViewModel>().ReverseMap();
 
             // =========================
-            //       КАТЕГОРИИ
+            //        КАТЕГОРИИ
             // =========================
-            // Связь: База (CategoryDb) <-> Домен (Category)
-            // При чтении из базы считаем количество курсов
             CreateMap<CategoryDb, Category>()
                 .ForMember(dest => dest.CourseCount, opt => opt.MapFrom(src => src.Courses != null ? src.Courses.Count : 0))
                 .ReverseMap();
 
-            // Связь: Домен (Category) <-> Представление (CategoryViewModel)
             CreateMap<Category, CategoryViewModel>().ReverseMap();
 
+            // Маппинг для админки (напрямую из БД в ViewModel)
+            CreateMap<CategoryDb, CategoryViewModel>()
+                 .ForMember(dest => dest.CourseCount, opt => opt.MapFrom(src => src.CourseCount)) // или src.Courses.Count
+                 .ReverseMap();
+
             // =========================
-            //         КУРСЫ
+            //          КУРСЫ
             // =========================
-            // 1. Связь: Домен <-> База (Course)
+            // 1. Связь: Домен <-> База
             CreateMap<Course, CourseDb>().ReverseMap();
 
-            // 2. Связь: Домен <-> Представление (CourseViewModel)
-            CreateMap<Course, CourseViewModel>().ReverseMap();
+            // 2. Связь: Домен <-> ViewModel
+            CreateMap<Course, CourseViewModel>()
+                .ForMember(dest => dest.ImagePath, opt => opt.MapFrom(src => src.Image))
+                .ReverseMap();
+
+            // 3. !!! ВАЖНОЕ ИСПРАВЛЕНИЕ ДЛЯ АДМИНКИ !!!
+            // Связь: База (CourseDb) <-> ViewModel (CourseViewModel)
+            // Это нужно для AdminController/EditCourse
+            CreateMap<CourseDb, CourseViewModel>()
+                .ForMember(dest => dest.ImagePath, opt => opt.MapFrom(src => src.Image))
+                .ReverseMap();
 
             // =========================
-            //        КОРЗИНА
+            //         КОРЗИНА
             // =========================
-            // 1. Связь: База <-> Домен
             CreateMap<CartDb, Cart>().ReverseMap();
 
-            // 2. Связь: Домен (Cart) -> Представление (CartViewModel)
-            // Здесь мы "вытаскиваем" данные из вложенного объекта Course в плоскую модель
             CreateMap<Cart, CartViewModel>()
                 .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Course.Name))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Course.Description)) // Добавили Description
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Course.Description))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Course.Price))
-                .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.Course.Image));
+                .ForMember(dest => dest.ImagePath, opt => opt.MapFrom(src => src.Course.Image));
         }
     }
 }

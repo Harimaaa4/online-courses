@@ -1,0 +1,78 @@
+﻿@model online_courses.Models.CourseViewModel
+
+@{
+    ViewData["Title"] = "Редактирование курса";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">✏️ Редактирование курса</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditCourse" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-4 text-center">
+                            @if (!string.IsNullOrEmpty(Model.ImagePath))
+                            {
+                                <img src="@Url.Content(Model.ImagePath)" class="img-thumbnail" style="max-height: 200px;" />
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label fw-bold">Категория</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories"></select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label">Название</label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Author" class="form-label">Автор</label>
+                                <input asp-for="Author" class="form-control" />
+                                <span asp-validation-for="Author" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Описание</label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Price" class="form-label">Цена (₽)</label>
+                                <input asp-for="Price" type="number" class="form-control" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Level" class="form-label">Уровень</label>
+                                <select asp-for="Level" class="form-select">
+                                    <option value="Beginner">Новичок</option>
+                                    <option value="Middle">Продвинутый</option>
+                                    <option value="Senior">Профи</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="ImageFile" class="form-label">Заменить фото</label>
+                                <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-warning">Обновить курс</button>
+                            <a asp-action="Courses" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

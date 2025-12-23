@@ -1,0 +1,75 @@
+﻿@model online_courses.Models.CourseViewModel
+
+@{
+    ViewData["Title"] = "Добавление курса";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Новый курс</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateCourse" method="post" enctype="multipart/form-data">
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label fw-bold"></label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                                <option disabled selected>-- Выберите категорию --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label">Название курса</label>
+                                <input asp-for="Name" class="form-control" placeholder="Основы C#" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Author" class="form-label">Автор/Компания</label>
+                                <input asp-for="Author" class="form-control" placeholder="Microsoft" />
+                                <span asp-validation-for="Author" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Описание</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Price" class="form-label">Цена (₽)</label>
+                                <input asp-for="Price" type="number" class="form-control" />
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ImageFile" class="form-label">Обложка</label>
+                                <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg">Создать курс</button>
+                            <a asp-action="Courses" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Level" class="form-label">Уровень сложности</label>
+                            <select asp-for="Level" class="form-select">
+                                <option value="Beginner">Новичок (Beginner)</option>
+                                <option value="Middle">Продвинутый (Middle)</option>
+                                <option value="Senior">Профи (Senior)</option>
+                            </select>
+                            <span asp-validation-for="Level" class="text-danger"></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

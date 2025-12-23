@@ -25,9 +25,9 @@ namespace online_courses.Services.Implementations
             // 1. Создаем категории, если их нет
             if (categories.Count == 0)
             {
-                await _categoryStorage.AddAsync(new CategoryDb { Id = Guid.NewGuid(), Name = "Программирование", Image = "~/images/prog.jpg", CreatedDate = DateTime.UtcNow });
-                await _categoryStorage.AddAsync(new CategoryDb { Id = Guid.NewGuid(), Name = "Дизайн", Image = "~/images/design.jpg", CreatedDate = DateTime.UtcNow });
-                await _categoryStorage.AddAsync(new CategoryDb { Id = Guid.NewGuid(), Name = "Маркетинг", Image = "~/images/marketing.jpg", CreatedDate = DateTime.UtcNow });
+                await _categoryStorage.AddAsync(new CategoryDb { Id = Guid.NewGuid(), Name = "Программирование", ImagePath = "/images/prog.jpg", CreatedDate = DateTime.UtcNow });
+                await _categoryStorage.AddAsync(new CategoryDb { Id = Guid.NewGuid(), Name = "Дизайн", ImagePath = "/images/design.jpg", CreatedDate = DateTime.UtcNow });
+                await _categoryStorage.AddAsync(new CategoryDb { Id = Guid.NewGuid(), Name = "Маркетинг", ImagePath = "/images/marketing.jpg", CreatedDate = DateTime.UtcNow });
 
                 categories = await _categoryStorage.GetAllAsync();
             }

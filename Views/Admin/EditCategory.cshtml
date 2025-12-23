@@ -1,0 +1,45 @@
+﻿@model online_courses.Models.CategoryViewModel
+
+@{
+    ViewData["Title"] = "Редактирование категории";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">✏️ Редактирование</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditCategory" method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3 text-center">
+                            @if (!string.IsNullOrEmpty(Model.ImagePath))
+                            {
+                                <img src="@Model.ImagePath" class="img-thumbnail" style="max-height: 150px;" />
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Название</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageFile" class="form-label">Заменить картинку</label>
+                            <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning">Обновить</button>
+                            <a asp-action="Categories" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

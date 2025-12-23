@@ -16,7 +16,7 @@
         {
             <a href="@Url.Action("ListCourses", "Home", new { categoryId = item.Id })" class="category-card">
                 <div class="category-img-wrapper">
-                    <img src="@Url.Content(item.Image)" alt="@item.Name" />
+                    <img src="@Url.Content(item.ImagePath)" alt="@item.Name" />
                 </div>
                 <div class="category-content">
                     <h3>@item.Name</h3>
