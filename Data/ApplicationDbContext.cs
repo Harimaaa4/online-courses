@@ -15,5 +15,6 @@ namespace online_courses.Data
         public DbSet<CourseDb> Courses { get; set; }
 
         public DbSet<CartDb> Carts { get; set; }
+        public DbSet<OrderDb> Orders { get; set; }
     }
 }

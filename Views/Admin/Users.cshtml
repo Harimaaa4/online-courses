@@ -1,0 +1,111 @@
+﻿@model IEnumerable<online_courses.Entities.UserDb>
+
+@{
+    ViewData["Title"] = "Пользователи";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>👥 Управление пользователями</h2>
+    </div>
+
+    <form asp-action="Users" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="searchString" class="form-control"
+                   placeholder="Поиск по нику или почте..."
+                   value="@ViewBag.CurrentFilter">
+            <button class="btn btn-primary" type="submit">Найти</button>
+            @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
+            {
+                <a asp-action="Users" class="btn btn-outline-secondary">Сбросить</a>
+            }
+        </div>
+    </form>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 80px;" class="text-center">Фото</th>
+                        <th>Логин</th>
+                        <th>Email</th>
+                        <th class="text-center">Роль</th>
+                        <th class="text-end pe-4">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr class="align-middle">
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(user.ImagePath))
+                                {
+                                    <img src="@Url.Content(user.ImagePath)"
+                                         class="rounded-circle"
+                                         style="width: 40px; height: 40px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center mx-auto"
+                                         style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                        @user.Login?.Substring(0, 1).ToUpper()
+                                    </div>
+                                }
+                            </td>
+                            <td class="fw-bold">@user.Login</td>
+                            <td>@user.Email</td>
+                            <td class="text-center">
+                                @if (user.Role == "Admin")
+                                {
+                                    <span class="badge bg-danger">Администратор</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Пользователь</span>
+                                }
+                            </td>
+                            <td class="text-end pe-3">
+                                @if (User.Identity.Name != user.Login)
+                                {
+                                    <a asp-action="ToggleRole" asp-route-id="@user.Id"
+                                       class="btn btn-sm @(user.Role == "Admin" ? "btn-outline-secondary" : "btn-outline-warning")">
+
+                                        @if (user.Role == "Admin")
+                                        {
+                                            <span>⬇ Снять админку</span>
+                                        }
+                                        else
+                                        {
+                                            <span>⬆ Дать админку</span>
+                                        }
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Это вы</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-warning mt-3 text-center">
+            Пользователи не найдены.
+        </div>
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">← Назад в меню</a>
+    </div>
+</div>

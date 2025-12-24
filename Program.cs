@@ -39,6 +39,7 @@ builder.Services.AddScoped<IInitializer, Initializer>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IBaseStorage<OrderDb>, OrderStorage>();
 
 // === ÀÓÒÅÍÒÈÔÈÊÀÖÈß (Cookie + Google) ===
 builder.Services.AddAuthentication(options =>

@@ -1,6 +1,6 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
 
-    
+    // Инициализация Bootstrap dropdowns (если используются в других местах)
     var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
     var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
         return new bootstrap.Dropdown(dropdownToggleEl)
@@ -148,7 +148,7 @@
             });
     }
 
-    // 5. КАРУСЕЛЬ (ИСПРАВЛЕННАЯ)
+    // 5. КАРУСЕЛЬ
     const carouselWrapper = document.querySelector('.services-wrapper');
     if (carouselWrapper) {
         window.addEventListener('load', () => {
@@ -158,10 +158,8 @@
 
     function startInfiniteCarousel(wrapper) {
         const originalWidth = wrapper.scrollWidth;
-        // Если контента мало, не крутим
         if (originalWidth <= wrapper.clientWidth) return;
 
-        // Клонируем элементы
         const cards = Array.from(wrapper.children);
         cards.forEach(c => wrapper.appendChild(c.cloneNode(true)));
 
@@ -171,8 +169,6 @@
 
         function scroll() {
             if (!isPaused) {
-                // ИСПРАВЛЕНИЕ: Берем реальную позицию, а не переменную scrollPos.
-                // Это позволяет кнопкам (scrollServices) работать без конфликтов.
                 if (wrapper.scrollLeft >= originalWidth) {
                     wrapper.scrollLeft = 0;
                 } else {
@@ -183,13 +179,11 @@
 
         setInterval(scroll, intervalTime);
 
-        // Пауза при наведении на саму карусель
         wrapper.addEventListener('mouseenter', () => isPaused = true);
         wrapper.addEventListener('mouseleave', () => isPaused = false);
         wrapper.addEventListener('touchstart', () => isPaused = true);
         wrapper.addEventListener('touchend', () => isPaused = false);
 
-        // ВАЖНО: Пауза при наведении на СТРЕЛКИ, чтобы скролл не дергался при клике
         document.querySelectorAll('.arrow').forEach(arrow => {
             arrow.addEventListener('mouseenter', () => isPaused = true);
             arrow.addEventListener('mouseleave', () => isPaused = false);
@@ -249,7 +243,6 @@
     if (sortOrderSelect) {
         sortOrderSelect.addEventListener('change', () => filterCourses());
     }
-
     if (searchInput) {
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -304,8 +297,9 @@
     }
 });
 
-// Helpers
-// В файле wwwroot/js/shared_script.js
+// =========================================
+//   HELPERS (Глобальные функции)
+// =========================================
 
 function sendRequest(method, url, body = null) {
     const headers = { 'Content-Type': 'application/json' };
@@ -315,63 +309,45 @@ function sendRequest(method, url, body = null) {
         headers: headers
     }).then(response => {
         if (!response.ok) {
-            // Пытаемся распарсить как JSON, если не вышло — читаем как текст
             return response.json()
                 .catch(() => response.text().then(text => {
-                    // Если JSON не распарсился, возвращаем текст или статус код
                     throw new Error(text || `Ошибка сервера: ${response.status}`);
                 }))
                 .then(errObj => {
-                    // Если распарсился JSON, пробрасываем его дальше как ошибку
                     throw errObj;
                 });
         }
-        // Успешный ответ
         return response.text().then(text => text ? JSON.parse(text) : {});
     });
 }
 
-// В файле wwwroot/js/shared_script.js
-
 function displayErrors(errors, container, form) {
     if (!container) return;
     container.innerHTML = '';
-
-    // Сброс красной обводки
     if (form) form.querySelectorAll('input').forEach(i => i.classList.remove('input-error'));
 
-    // 1. Если пришел объект с полем description (формат из HomeController)
     if (errors.description) {
         const div = document.createElement('div');
         div.className = 'error-message';
         div.textContent = errors.description;
         container.appendChild(div);
-    }
-    // 2. Если пришел массив ошибок (формат из AccountController)
-    else if (Array.isArray(errors)) {
+    } else if (Array.isArray(errors)) {
         errors.forEach(e => {
             const div = document.createElement('div');
             div.className = 'error-message';
             div.textContent = e.message || e;
             container.appendChild(div);
-
-            // Если есть поле Field, подсвечиваем input
             if (form && e.field) {
-                // Ищем input по name (с учетом регистра или без)
                 const input = form.querySelector(`input[name="${e.field}"]`);
                 if (input) input.classList.add('input-error');
             }
         });
-    }
-    // 3. Если это стандартная JS ошибка (Error) или объект с message
-    else if (errors.message) {
+    } else if (errors.message) {
         const div = document.createElement('div');
         div.className = 'error-message';
-        div.textContent = errors.message; // Например: "400" или "Network Error"
+        div.textContent = errors.message;
         container.appendChild(div);
-    }
-    // 4. Если это просто строка
-    else if (typeof errors === 'string') {
+    } else if (typeof errors === 'string') {
         const div = document.createElement('div');
         div.className = 'error-message';
         div.textContent = errors;
@@ -380,19 +356,39 @@ function displayErrors(errors, container, form) {
 }
 
 // =========================================
-//   ФУНКЦИИ ДЛЯ КЛИКОВ В HTML (ВНЕ DOMContentLoaded)
+//   ФУНКЦИИ ВНЕ DOMContentLoaded
 // =========================================
 
 // Функция для стрелок влево/вправо
 window.scrollServices = function (direction) {
     const wrapper = document.querySelector('.services-wrapper');
     if (wrapper) {
-        // Ширина карточки (300) + отступ (30) = 330
         const scrollAmount = 330;
-
         wrapper.scrollBy({
             left: direction * scrollAmount,
             behavior: 'smooth'
         });
     }
 };
+
+// =========================================
+//   МЕНЮ ПРОФИЛЯ (ПОЛНАЯ ЛОГИКА)
+// =========================================
+
+document.addEventListener('click', function (e) {
+    const subMenu = document.getElementById("subMenu");
+    const userIcon = document.getElementById("user-icon");
+
+    // Если пользователь не авторизован (элементов нет на странице), выходим
+    if (!subMenu || !userIcon) return;
+
+    // 1. Если кликнули ТОЧНО ПО ИКОНКЕ (или её содержимому) -> Переключаем
+    if (userIcon.contains(e.target)) {
+        subMenu.classList.toggle("open-menu");
+    }
+    // 2. Если кликнули КУДА УГОДНО, но НЕ по меню -> Закрываем
+    // (Условие !userIcon.contains(e.target) здесь уже выполняется автоматически благодаря else if)
+    else if (!subMenu.contains(e.target)) {
+        subMenu.classList.remove("open-menu");
+    }
+});

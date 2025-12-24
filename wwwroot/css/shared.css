@@ -1509,3 +1509,216 @@ body.dark-mode .user-dropdown-btn {
 body.dark-mode .user-avatar {
     border-color: #444;
 }
+/* =========================================
+   ИСПРАВЛЕНИЯ ДЛЯ АДМИН-ПАНЕЛИ (ФИНАЛЬНЫЕ)
+   ========================================= */
+
+/* --- 1. КАРТОЧКИ БЫСТРОГО ДОСТУПА --- */
+/* Убираем белую вспышку, используем цвет темы */
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    background-color: var(--bg-surface); /* Исходный цвет из темы */
+}
+
+    /* При наведении: */
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+        z-index: 2;
+    }
+
+/* Специфика для Темной темы: легкая подсветка фона при наведении */
+body.dark-mode .hover-card:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Специфика для Светлой темы: легкое затемнение */
+body:not(.dark-mode) .hover-card:hover {
+    background-color: #f8f9fa !important;
+}
+
+
+/* --- 2. ТАБЛИЦЫ (КУРСЫ, ЮЗЕРЫ, ЗАКАЗЫ) --- */
+/* Главное исправление: убираем белый фон Bootstrap и форсируем цвета темы */
+.table {
+    --bs-table-bg: transparent !important; /* Прозрачный фон таблицы */
+    --bs-table-color: var(--text-primary) !important; /* Цвет текста из темы */
+    color: var(--text-primary) !important;
+    background-color: transparent !important;
+}
+
+    /* Исправляем фон и текст ячеек */
+    .table td, .table th {
+        background-color: var(--bg-surface) !important; /* Фон ячейки = фон карточки */
+        color: var(--text-primary) !important;
+        border-color: var(--border-color-light) !important;
+        vertical-align: middle;
+        font-weight: 500; /* Чуть жирнее для читаемости */
+    }
+
+    /* Шапка таблицы (всегда темная и стильная) */
+    .table thead th {
+        background-color: #2c2c2e !important;
+        color: #fff !important;
+        border-bottom: none;
+        box-shadow: none !important;
+    }
+
+    /* Запрещаем менять цвет шапки при наведении */
+    .table thead tr:hover {
+        background-color: transparent !important;
+    }
+
+/* Полосатость (Striped rows) - адаптивная */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    /* Легкая тень вместо жесткого цвета, чтобы работало в обеих темах */
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    color: var(--text-primary) !important;
+}
+
+/* В темной теме полоски чуть светлее */
+body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Эффект наведения на строку (Hover) - красивый синий оттенок */
+.table-hover > tbody > tr:hover > * {
+    background-color: rgba(0, 113, 227, 0.1) !important;
+    color: var(--text-primary) !important;
+}
+/* =========================================
+   НОВОЕ ВЫПАДАЮЩЕЕ МЕНЮ ПРОФИЛЯ
+   ========================================= */
+
+/* Контейнер профиля */
+.profile-container {
+    position: relative;
+    display: inline-block;
+    margin-left: 15px; /* Отступ от переключателя темы */
+}
+
+/* Аватарка в шапке */
+.user-pic {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    object-fit: cover;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .user-pic:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+/* Обертка меню (скрытая часть) */
+.sub-menu-wrap {
+    position: absolute;
+    top: 120%; /* Чуть ниже аватарки */
+    right: 0;
+    width: 300px;
+    max-height: 0; /* Скрыто по умолчанию */
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out; /* Плавная анимация */
+    z-index: 9999; /* Поверх всего */
+}
+
+    /* Класс, который добавляет JS для открытия */
+    .sub-menu-wrap.open-menu {
+        max-height: 450px; /* Раскрываем высоту */
+    }
+
+/* Само меню (дизайн) */
+.sub-menu {
+    background: var(--bg-surface); /* Цвет фона из темы */
+    padding: 20px;
+    margin: 10px; /* Отступ для тени */
+    border-radius: 15px;
+    border: 1px solid var(--border-color-light);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15); /* Тень */
+}
+
+/* Инфо о пользователе внутри меню */
+.user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+    .user-info img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+        object-fit: cover;
+    }
+
+    .user-info h3 {
+        font-weight: 600;
+        font-size: 18px;
+        color: var(--text-primary); /* Цвет текста из темы */
+        margin: 0;
+        line-height: 1.2;
+        word-break: break-word; /* Чтобы длинные имена не ломали верстку */
+    }
+
+/* Разделительная линия */
+.sub-menu hr {
+    border: 0;
+    height: 1px;
+    width: 100%;
+    background: var(--border-color-light);
+    margin: 10px 0 15px;
+}
+
+/* Ссылки в меню */
+.sub-menu-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-secondary);
+    margin: 10px 0;
+    padding: 8px 0;
+    transition: transform 0.3s, color 0.3s;
+}
+
+    .sub-menu-link:hover {
+        color: var(--text-primary);
+        transform: translateX(5px); /* Сдвиг вправо при наведении */
+    }
+
+    /* Иконки в меню */
+    .sub-menu-link svg {
+        width: 35px; /* Размер кружка иконки */
+        height: 35px;
+        padding: 7px;
+        background: rgba(0,0,0,0.05); /* Легкий серый фон кружка */
+        border-radius: 50%;
+        margin-right: 15px;
+        transition: background 0.3s;
+    }
+
+/* Иконки в темной теме */
+body.dark-mode .sub-menu-link svg {
+    background: rgba(255,255,255,0.1);
+}
+
+.sub-menu-link p {
+    width: 100%;
+    margin: 0;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--text-primary);
+}
+
+/* Стрелочка в конце ссылки */
+.sub-menu-link span {
+    font-size: 18px;
+    color: var(--text-secondary);
+    transition: transform 0.3s;
+}
+
+.sub-menu-link:hover span {
+    transform: translateX(3px);
+}

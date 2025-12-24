@@ -1,28 +1,95 @@
-﻿@{
+﻿@model online_courses.Models.AdminDashboardViewModel
+
+@{
     ViewData["Title"] = "Панель администратора";
 }
 
-<div class="container mt-5">
-    <h1 class="mb-4">👑 Панель администратора</h1>
-    <div class="row">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title">📂 Категории</h5>
-                    <p class="card-text">Создание, редактирование и удаление категорий курсов.</p>
-                    <a asp-controller="Admin" asp-action="Categories" class="btn btn-primary">Управление категориями</a>
+<div class="container mt-5 mb-5">
+    <h2 class="mb-4 fw-bold">📊 Панель управления</h2>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow h-100 border-0">
+                <div class="card-body">
+                    <h5 class="card-title opacity-75">Пользователи</h5>
+                    <p class="display-6 fw-bold">@Model.UsersCount</p>
                 </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow h-100 border-0">
+                <div class="card-body">
+                    <h5 class="card-title opacity-75">Курсы</h5>
+                    <p class="display-6 fw-bold">@Model.CoursesCount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark shadow h-100 border-0">
+                <div class="card-body">
+                    <h5 class="card-title opacity-75">Заказов сегодня</h5>
+                    <p class="display-6 fw-bold">@Model.OrdersToday</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow h-100 border-0">
+                <div class="card-body">
+                    <h5 class="card-title opacity-75">Выручка</h5>
+                    <p class="display-6 fw-bold">@Model.RevenueTotal.ToString("N0") ₽</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <h5 class="card-title">🎓 Курсы</h5>
-                    <p class="card-text">Добавление новых курсов, изменение цен и описаний.</p>
-                    <a asp-controller="Admin" asp-action="Courses" class="btn btn-primary">Управление курсами</a>
+    <h3 class="mb-3">Быстрый доступ</h3>
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm hover-card text-center py-4">
+                <div class="card-body">
+                    <div class="fs-1 mb-2">📂</div>
+                    <h5>Категории</h5>
+                    <a asp-action="Categories" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm hover-card text-center py-4">
+                <div class="card-body">
+                    <div class="fs-1 mb-2">🎓</div>
+                    <h5>Курсы</h5>
+                    <a asp-action="Courses" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm hover-card text-center py-4">
+                <div class="card-body">
+                    <div class="fs-1 mb-2">👥</div>
+                    <h5>Пользователи</h5>
+                    <a asp-action="Users" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm hover-card text-center py-4 border-warning">
+                <div class="card-body">
+                    <div class="fs-1 mb-2">🛒</div>
+                    <h5>Заказы</h5>
+                    <a asp-action="Orders" class="stretched-link"></a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .hover-card {
+        transition: transform 0.2s;
+    }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            background-color: #f8f9fa;
+        }
+</style>

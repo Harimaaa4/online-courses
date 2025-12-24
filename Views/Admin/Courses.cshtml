@@ -1,66 +1,74 @@
 ﻿@model IEnumerable<online_courses.Entities.CourseDb>
 
 @{
-    ViewData["Title"] = "Управление курсами";
+    ViewData["Title"] = "Курсы";
 }
 
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>🎓 Список курсов</h2>
-        <a asp-action="CreateCourse" class="btn btn-primary">
-            + Добавить курс
-        </a>
+        <a asp-action="CreateCourse" class="btn btn-success">+ Новый курс</a>
+    </div>
+
+    <form asp-action="Courses" method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="searchString" class="form-control"
+                   placeholder="Поиск по названию или автору..."
+                   value="@ViewBag.CurrentFilter">
+            <button class="btn btn-primary" type="submit">Найти</button>
+            @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter as string))
+            {
+                <a asp-action="Courses" class="btn btn-outline-secondary">Сбросить</a>
+            }
+        </div>
+    </form>
+
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 80px;" class="text-center">Фото</th>
+                        <th>Название</th>
+                        <th>Цена</th>
+                        <th>Автор</th>
+                        <th class="text-end pe-4">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="align-middle">
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(item.Image))
+                                {
+                                    <img src="@Url.Content(item.Image)"
+                                         class="rounded"
+                                         style="width: 50px; height: 35px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Нет</span>
+                                }
+                            </td>
+                            <td class="fw-bold">@item.Name</td>
+                            <td>@item.Price.ToString("C")</td>
+                            <td><small class="text-muted">@item.Author</small></td>
+                            <td class="text-end pe-3">
+                                <a asp-action="EditCourse" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-2">✏️</a>
+                                <a asp-action="DeleteCourse" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Вы уверены, что хотите удалить курс «@item.Name»?');">🗑️</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">Курсов пока нет.</div>
-    }
-    else
-    {
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th style="width: 80px;">Фото</th>
-                    <th>Название</th>
-                    <th>Цена</th>
-                    <th>Автор</th>
-                    <th class="text-end">Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>
-                            @if (!string.IsNullOrEmpty(item.Image))
-                            {
-                                <img src="@Url.Content(item.Image)" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;" />
-                            }
-                            else
-                            {
-                                <span class="text-muted small">Нет</span>
-                            }
-                        </td>
-                        <td class="fw-bold">@item.Name</td>
-                        <td>@item.Price.ToString("N0") ₽</td>
-                        <td>@item.Author</td>
-                        <td class="text-end">
-                            <a asp-action="EditCourse" asp-route-id="@item.Id"
-                               class="btn btn-sm btn-outline-primary me-2" title="Редактировать">
-                                ✏️
-                            </a>
-
-                            <a asp-action="DeleteCourse" asp-route-id="@item.Id"
-                               class="btn btn-sm btn-outline-danger" title="Удалить"
-                               onclick="return confirm('Вы уверены, что хотите удалить курс «@item.Name»?');">
-                                🗑️
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="alert alert-warning mt-3 text-center">Курсы не найдены.</div>
     }
 
     <div class="mt-3">
